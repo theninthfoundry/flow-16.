@@ -422,12 +422,12 @@ const MONTHS = [
 ];
 
 const TRACKS=[
-  {name:"DSA Practice",icon:"⚡",c:"#22D3EE",weekly:"5-8 hrs/wk",target:"300-500 problems",desc:"Pattern recognition over memorisation. Section-by-section, never random. Understand why the pattern works, not just that it does.",steps:["M1-2: Easy arrays, strings, hashing. Build speed and confidence","M3-4: Easy-medium mix. Introduce tree traversals early","M5-6: Medium primary. Sliding window, two pointers, BST, heaps","M7-8: Medium-hard. Graphs, DP, backtracking, greedy","M9-12: Hard patterns. Mock interviews. Timed Codeforces contests"]},
-  {name:"Open Source",icon:"🔓",c:"#A78BFA",weekly:"3-5 hrs/wk",target:"50+ merged PRs",desc:"Communication matters as much as code. Ladder deliberately: typos, docs, bugs, features, maintainer. Discuss before coding always.",steps:["M1-2: Read large codebases. Fix typos and broken links","M3-4: Improve documentation, write setup/contribution guides","M5-6: Bug fixes from issue tracker. Discuss approach before submitting","M7-8: Add small features. Review others PRs. Become known","M9-12: Real features in Python/AI frameworks. Own a sub-area"]},
-  {name:"GitHub and Portfolio",icon:"📁",c:"#34D399",weekly:"Daily",target:"1000+ commits, 5 flagships",desc:"Every repository is proof of skill. Professional READMEs, architecture diagrams, CI/CD, releases, tests. Recruiters spend 30-90 seconds per repo.",steps:["M1: Profile README, repository structure templates, learning logs","M2-3: Small utility projects — typed, tested, documented","M4-6: Project depth increases. GitHub Actions on everything","M7-9: Full-stack deployed projects. Architecture diagrams","M10-12: AI flagship projects. GitHub Pages portfolio site"]},
-  {name:"Technical Reading",icon:"📖",c:"#FBBF24",weekly:"3 hrs/wk",target:"1 deep-dive/week",desc:"Build mental models, not just knowledge. DDIA (Kleppmann) is mandatory. Then arXiv papers weekly from Month 10.",steps:["M1-3: Stripe/Netflix/Cloudflare tech blogs. OSS documentation","M4-6: System design articles. Begin Designing Data-Intensive Applications","M7-9: Architecture papers. Complete DDIA. Database internals","M10-12: arXiv ML/AI/safety papers. Benchmark reports. Research blogs"]},
-  {name:"Technical Writing",icon:"✍️",c:"#F87171",weekly:"1-2 hrs/wk",target:"10+ blog posts",desc:"Writing forces precision. Top engineers communicate clearly. If you cannot explain it, you do not fully understand it. Publish on Hashnode or dev.to.",steps:["M1-3: READMEs, setup guides, architecture decision records","M4-6: Technical breakdowns of things you built","M7-9: System design write-ups, tradeoff analysis posts","M10-12: Blog posts on RAG, agents, LLM internals, safety"]},
-  {name:"AI Industry Awareness",icon:"🧠",c:"#EC4899",weekly:"2-3 hrs/wk",target:"Frontier-aware always",desc:"Know the ecosystem: models, frameworks, infra, startups, research. You are entering this industry — know the landscape from day one.",steps:["M1-6: AI landscape overview. What models exist. What is changing","M7-9: Infrastructure focus: inference, serving, orchestration","M10-12: Research papers: attention variants, agent frameworks, alignment"]}
+  {name:"DSA Practice",icon:"⚡",c:"#22D3EE",weekly:"5-8 hrs/wk",target:"300-500 problems",desc:"DSA: Focus on Pattern Recognition. Understand the theoretical tradeoffs under the hood. Train yourself to map problem signals to concrete family patterns within 60 seconds.",steps:["M1-2: Easy arrays, strings, hashing. Build speed and confidence","M3-4: Easy-medium mix. Introduce tree traversals early","M5-6: Medium primary. Sliding window, two pointers, BST, heaps","M7-8: Medium-hard. Graphs, DP, backtracking, greedy","M9-12: Hard patterns. Mock interviews. Timed Codeforces contests"]},
+  {name:"Open Source",icon:"🔓",c:"#A78BFA",weekly:"3-5 hrs/wk",target:"20-50 merged PRs",desc:"Become a maintainer-level contributor. Merging high-quality features, reviewing others' code, writing robust unit/integration tests, and maintaining CI pipelines is the ultimate GSoC and elite industry credential.",steps:["M1-2: Read large codebases. Fix typos and broken links","M3-4: Improve documentation, write setup/contribution guides","M5-6: Bug fixes from issue tracker. Discuss approach before submitting","M7-8: Add small features. Review others PRs. Become known","M9-12: Real features in Python/AI frameworks. Own a sub-area"]},
+  {name:"GitHub and Portfolio",icon:"📁",c:"#34D399",weekly:"Daily",target:"1000+ commits, 5 flagships",desc:"Career readiness for Frontier AI, Quant firms, and elite startups. Build a professional unified resume in 2028: expert Python, system-level C/C++, advanced SQL, and TypeScript tooling.",steps:["M1: Profile README, repository structure templates, learning logs","M2-3: Small utility projects — typed, tested, documented","M4-6: Project depth increases. GitHub Actions on everything","M7-9: Full-stack deployed projects. Architecture diagrams","M10-12: AI flagship projects. GitHub Pages portfolio site"]},
+  {name:"Technical Reading",icon:"📖",c:"#FBBF24",weekly:"3 hrs/wk",target:"1 deep-dive/week",desc:"The Primary Sources Rule. Top systems engineers read RFCs, official manual specifications, developer logs, and arXiv papers rather than passive video tutorials.",steps:["M1-3: Stripe/Netflix/Cloudflare tech blogs. OSS documentation","M4-6: System design articles. Begin Designing Data-Intensive Applications","M7-9: Architecture papers. Complete DDIA. Database internals","M10-12: arXiv ML/AI/safety papers. Benchmark reports. Research blogs"]},
+  {name:"Technical Writing",icon:"✍️",c:"#F87171",weekly:"1-2 hrs/wk",target:"10+ blog posts",desc:"Writing is a force multiplier that forces precision and clarifies complex systems thinking. Write design proposals, RFCs, issue reports, PR summaries, and architectural logs.",steps:["M1-3: READMEs, setup guides, architecture decision records","M4-6: Technical breakdowns of things you built","M7-9: System design write-ups, tradeoff analysis posts","M10-12: Blog posts on RAG, agents, LLM internals, safety"]},
+  {name:"AI Industry Awareness",icon:"🧠",c:"#EC4899",weekly:"2-3 hrs/wk",target:"Ecosystem expert",desc:"Understand model providers, serving infrastructure, orchestration frameworks, and hardware bottlenecks. Gain complete system-level context of where the industry is moving.",steps:["M1-6: AI landscape overview. What models exist. What is changing","M7-9: Infrastructure focus: inference, serving, orchestration","M10-12: Research papers: attention variants, agent frameworks, alignment"]}
 ];
 
 const DIFF_C={"Critical":"#FF2D78","Must Own":"#FF2D78","Foundation":"#22D3EE","Core":"#94A3B8","Important":"#A78BFA","Deep":"#FBBF24","Frontier":"#F97316","Master":"#10B981"};
@@ -2226,6 +2226,15 @@ export default function App(){
   const [focusedMonth, setFocusedMonth] = useState(null);
   const [syncState, setSyncState] = useState("saved"); // "saving" | "saved"
 
+  // Elite 1% Mastery States
+  const [eliteDone, setEliteDone] = useState(() => ls.get("rmx_elite_done", {}));
+  const [eliteExpandedDifferentiator, setEliteExpandedDifferentiator] = useState(null);
+  const [eliteActiveCategory, setEliteActiveCategory] = useState("all");
+  const [eliteSundayAnswers, setEliteSundayAnswers] = useState(() => ls.get("rmx_sunday_answers", {
+    q1: "", q2: "", q3: "", q4: "", q5: "", q6: ""
+  }));
+  const [weeklyHabits, setWeeklyHabits] = useState(() => ls.get("rmx_weekly_habits", {}));
+
   const isFirstRender = useRef(true);
 
 
@@ -2471,6 +2480,7 @@ export default function App(){
                   { key: "roadmap", label: "Roadmap", icon: "rebel", color: "#FF2D78" },
                   { key: "library", label: "Library", icon: "jedi", color: "#A78BFA" },
                   { key: "tracks", label: "Tracks", icon: "mando", color: "#38bdf8" },
+                  { key: "elite", label: "Elite 1%", icon: "jedi", color: "#FBBF24" },
                   { key: "progress", label: "Progress", icon: "empire", color: "#10F5A0" }
                 ].map(item => (
                   <button
@@ -2869,11 +2879,556 @@ export default function App(){
                             <span style={{fontSize:"11px",color:T2,lineHeight:1.6}}>{step}</span>
                           </div>
                         ))}
+
+                        {i === 0 && (
+                          <div style={{ marginTop: "16px", background: "rgba(34, 211, 238, 0.03)", border: "1px solid rgba(34, 211, 238, 0.15)", borderRadius: "8px", padding: "12px 14px" }}>
+                            <div style={{ fontSize: "10px", letterSpacing: "1px", color: "#22D3EE", fontWeight: "800", marginBottom: "10px", textTransform: "uppercase" }}>🎯 Algorithmic Pattern Recognition Key</div>
+                            <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1.3fr", gap: "8px 12px", fontSize: "11px", color: T2 }}>
+                              <div style={{ fontWeight: "700", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "4px", color: T3 }}>IF PROBLEM SIGNAL SAYS...</div>
+                              <div style={{ fontWeight: "700", borderBottom: "1px solid rgba(255,255,255,0.06)", paddingBottom: "4px", color: T3 }}>FIRST PATTERN TO CONSIDER</div>
+                              
+                              <div>• Pair sum, complements</div><div style={{ color: "#22D3EE", fontWeight: "600" }}>Hash Map / Two Pointers</div>
+                              <div>• Longest substring/subarray</div><div style={{ color: "#22D3EE", fontWeight: "600" }}>Sliding Window</div>
+                              <div>• Sorted array</div><div style={{ color: "#22D3EE", fontWeight: "600" }}>Binary Search / Two Pointers</div>
+                              <div>• Tree path, depth</div><div style={{ color: "#22D3EE", fontWeight: "600" }}>DFS</div>
+                              <div>• Shortest path</div><div style={{ color: "#22D3EE", fontWeight: "600" }}>BFS / Dijkstra</div>
+                              <div>• Top K elements</div><div style={{ color: "#22D3EE", fontWeight: "600" }}>Heap / Priority Queue</div>
+                              <div>• Dependencies/ordering</div><div style={{ color: "#22D3EE", fontWeight: "600" }}>Topological Sort</div>
+                              <div>• Connected components</div><div style={{ color: "#22D3EE", fontWeight: "600" }}>DFS / Union-Find</div>
+                              <div>• All possible combinations</div><div style={{ color: "#22D3EE", fontWeight: "600" }}>Backtracking</div>
+                              <div>• Maximize/minimize with overlaps</div><div style={{ color: "#22D3EE", fontWeight: "600" }}>Dynamic Programming</div>
+                              <div>• Interval merging/scheduling</div><div style={{ color: "#22D3EE", fontWeight: "600" }}>Greedy + Sorting</div>
+                              <div>• Frequent range queries/updates</div><div style={{ color: "#22D3EE", fontWeight: "600" }}>Segment Tree / Fenwick Tree</div>
+                            </div>
+                          </div>
+                        )}
+
+                        {i === 1 && (
+                          <div style={{ marginTop: "16px", background: "rgba(167, 139, 250, 0.03)", border: "1px solid rgba(167, 139, 250, 0.15)", borderRadius: "8px", padding: "12px 14px" }}>
+                            <div style={{ fontSize: "10px", letterSpacing: "1px", color: "#A78BFA", fontWeight: "800", marginBottom: "8px", textTransform: "uppercase" }}>🏆 Elite Open Source Strategy</div>
+                            <div style={{ fontSize: "11px", color: T2, lineHeight: "1.6" }}>
+                              <div style={{ marginBottom: "6px" }}><strong style={{ color: T1 }}>Sustained Merged PRs:</strong> Target 20–50 meaningful merged pull requests (such as bug fixes, performance optimizations, or features rather than typos) to build real authority.</div>
+                              <div style={{ marginBottom: "6px" }}><strong style={{ color: T1 }}>Review Familiarity:</strong> Understand a complex codebase to the level where you can perform constructive code reviews on other developers' submissions.</div>
+                              <div><strong style={{ color: T1 }}>GSoC Focus:</strong> Mentors value steady, high-quality, continuous contributions, active discussion before coding, and clean test integrations far more than singular, flashy standalone projects.</div>
+                            </div>
+                          </div>
+                        )}
+
+                        {i === 2 && (
+                          <div style={{ marginTop: "16px", background: "rgba(52, 211, 153, 0.03)", border: "1px solid rgba(52, 211, 153, 0.15)", borderRadius: "8px", padding: "12px 14px" }}>
+                            <div style={{ fontSize: "10px", letterSpacing: "1px", color: "#34D399", fontWeight: "800", marginBottom: "8px", textTransform: "uppercase" }}>💼 The 2028 Multi-Stack Resume</div>
+                            <div style={{ fontSize: "11px", color: T2, lineHeight: "1.6" }}>
+                              <div style={{ marginBottom: "6px" }}><strong style={{ color: T1 }}>Primary Language Stack:</strong> Expert Python (AI orchestration) + system-level C/C++ (high performance & low-latency execution).</div>
+                              <div style={{ marginBottom: "6px" }}><strong style={{ color: T1 }}>Complementary Stack:</strong> TypeScript (excellent for tooling, frontend preview components, and CLI development) + Advanced SQL (expert query optimization & schema design).</div>
+                              <div><strong style={{ color: T1 }}>The Credentials:</strong> Elite roles at Frontier AI labs, quant firms, and top infrastructure startups require solid evidence of debugging massive distributed systems, not just simple wrappers.</div>
+                            </div>
+                          </div>
+                        )}
+
+                        {i === 3 && (
+                          <div style={{ marginTop: "16px", background: "rgba(251, 191, 36, 0.03)", border: "1px solid rgba(251, 191, 36, 0.15)", borderRadius: "8px", padding: "12px 14px" }}>
+                            <div style={{ fontSize: "10px", letterSpacing: "1px", color: "#FBBF24", fontWeight: "800", marginBottom: "8px", textTransform: "uppercase" }}>📖 The Primary Sources Rule</div>
+                            <div style={{ fontSize: "11px", color: T2, lineHeight: "1.6" }}>
+                              <div style={{ marginBottom: "6px" }}><strong style={{ color: T1 }}>Say No to Video Loops:</strong> passive consumption of short summary videos creates a false sense of learning. Top engineers consume documentation.</div>
+                              <div style={{ marginBottom: "6px" }}><strong style={{ color: T1 }}>The Sources:</strong> Always read RFCs, official manual specifications, open-source repository commit logs, and arXiv research papers directly.</div>
+                              <div><strong style={{ color: T1 }}>Compounding Knowledge:</strong> Build rich mental models. Kleppmann's DDIA is non-negotiable. Then consume technical blogs (Cloudflare, Netflix, Stripe) to understand systems at high scale.</div>
+                            </div>
+                          </div>
+                        )}
+
+                        {i === 4 && (
+                          <div style={{ marginTop: "16px", background: "rgba(248, 113, 113, 0.03)", border: "1px solid rgba(248, 113, 113, 0.15)", borderRadius: "8px", padding: "12px 14px" }}>
+                            <div style={{ fontSize: "10px", letterSpacing: "1px", color: "#F87171", fontWeight: "800", marginBottom: "8px", textTransform: "uppercase" }}>✍️ Writing as an Engineering Force Multiplier</div>
+                            <div style={{ fontSize: "11px", color: T2, lineHeight: "1.6" }}>
+                              <div style={{ marginBottom: "6px" }}><strong style={{ color: T1 }}>Precision Over Vagueness:</strong> If you cannot explain it clearly in writing, you do not understand it. Writing forces you to resolve architectural ambiguities.</div>
+                              <div style={{ marginBottom: "6px" }}><strong style={{ color: T1 }}>Production Writing artifacts:</strong> Practice writing professional README files, architectural design proposals (RFCs), API design logs, and detailed pull request summaries.</div>
+                              <div><strong style={{ color: T1 }}>Engineering Brand:</strong> Clear communication is what differentiates a standard developer from an AI Systems leader. Share your design trade-offs publicly.</div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {tab==="elite"&&(
+          <div className="rm-fade" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            {/* Header section with high caliber quote */}
+            <div style={{ background: CARD, border: `1px solid ${BDR}`, borderRadius: "11px", padding: "16px 18px", position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", right: "-10px", top: "-10px", fontSize: "72px", fontWeight: "900", color: "rgba(251, 191, 36, 0.03)", pointerEvents: "none", userSelect: "none" }}>1%</div>
+              <div style={{ fontSize: "9px", letterSpacing: "2.5px", color: "#FBBF24", fontWeight: "700", textTransform: "uppercase", marginBottom: "4px" }}>Core Mindset & Leverage</div>
+              <div style={{ fontSize: "16px", fontWeight: "800", color: T1, letterSpacing: "-0.4px", marginBottom: "8px" }}>Elite Systems Engineering Mastery</div>
+              <div style={{ fontSize: "12px", color: T2, lineHeight: "1.65" }}>
+                By 2028, the top 1% of systems engineers won't be defined by passive framework adoption, but by <span style={{ color: "#FBBF24", fontWeight: "700" }}>First-Principles Reasoning</span>, deep runtime fluency, and relentless mastery across the computing stack. Leverage is built on compounding fundamentals.
+              </div>
+            </div>
+
+            {/* The 8 Engineering Layers (Accordion Stack) */}
+            <div style={{ background: CARD, border: `1px solid ${BDR}`, borderRadius: "11px", padding: "16px" }}>
+              <div style={{ fontSize: "10px", letterSpacing: "1.5px", color: "#FBBF24", fontWeight: "700", textTransform: "uppercase", marginBottom: "12px" }}>🛡️ The 8 Engineering Layers</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {[
+                  {
+                    level: "L0",
+                    name: "Engineering Mindset",
+                    color: "#FBBF24",
+                    desc: "The operating system of your career. First-principles reasoning, deep systems-level curiosity, comfort with high ambiguity, and intense extreme ownership of full-stack systems.",
+                    bullets: ["First-Principles thinking (deconstruct to core physics)", "Systems thinking (view systems as complete feedback loops)", "Obsess over why components are built the way they are"]
+                  },
+                  {
+                    level: "L1",
+                    name: "Computer Science Foundations",
+                    color: "#22D3EE",
+                    desc: "The mathematical and physical rules of software execution.",
+                    bullets: ["DSA Pattern Recognition: signal-to-pattern mapping", "Operating System Internals: context switches, page tables, system calls", "Networking Protocols: TCP/IP, sockets, multiplexing, transport safety", "Database Indexing: B-Trees, LSM-Trees, Hash indices, Query optimization"]
+                  },
+                  {
+                    level: "L2",
+                    name: "Software Engineering Core",
+                    color: "#A78BFA",
+                    desc: "Writing code that compounds safely across years.",
+                    bullets: ["Python (Expert core, profiling, package execution)", "C/C++ (Memory manual layouts, pointer arithmetic, zero-overhead performance)", "TypeScript (Static type analysis, compiler tooling, high-scale web controls)", "Advanced SQL (Analytical queries, schema migrations, concurrency levels)"]
+                  },
+                  {
+                    level: "L3",
+                    name: "Distributed Systems",
+                    color: "#F87171",
+                    desc: "Scaling compute and state across multiple independent systems.",
+                    bullets: ["Consensus Protocols: Raft, Paxos, multi-leader replication", "Data Consistency: CAP, PACELC, event sourcing, transactional safety", "Messaging Layers: Kafka, RabbitMQ, partition strategies"]
+                  },
+                  {
+                    level: "L4",
+                    name: "Cloud Infrastructure & SRE",
+                    color: "#34D399",
+                    desc: "Deploying and managing live production environments under active load.",
+                    bullets: ["Container Orchestration: Docker execution layers, Kubernetes control planes", "Infrastructure-as-code: Terraform declarative state management", "Observability: Traces, metrics, logs, OpenTelemetry, Prometheus dashboards"]
+                  },
+                  {
+                    level: "L5",
+                    name: "AI Engineering & Retrieval",
+                    color: "#EC4899",
+                    desc: "Integrating frontier intelligence into responsive applications.",
+                    bullets: ["ML Foundations: backpropagation, linear algebra, vector geometry", "Deep Learning frameworks: PyTorch neural architecture, custom loss layers", "RAG Systems: Hybrid retrieval, chunking pipelines, dense embeddings"]
+                  },
+                  {
+                    level: "L6",
+                    name: "Agent Orchestration",
+                    color: "#38bdf8",
+                    desc: "Coordinating multi-step planning and model feedback loops.",
+                    bullets: ["Tool Calling: JSON Schemas, parameter parsing, runtime invocation", "Planning Cycles: ReAct, Tree of Thoughts, Hierarchical state machines", "Orchestration Libraries: LangGraph state preservation, Autogen conversations"]
+                  },
+                  {
+                    level: "L7",
+                    name: "AI Infrastructure & Serving",
+                    color: "#F97316",
+                    desc: "Optimizing low-latency execution and high hardware utilisation.",
+                    bullets: ["Inference Engines: vLLM continuous batching, TensorRT graph compiler", "Hardware Optimization: CUDA memory layouts, tensor/pipeline parallelism", "Speculative Decoding: parallel small model drafting for low latency"]
+                  },
+                  {
+                    level: "L8",
+                    name: "Research & Frontier Governance",
+                    color: "#10F5A0",
+                    desc: "The emerging frontier of alignment, safety, and runtime control.",
+                    bullets: ["Alignment: Constitutional AI feedback, RLHF preference pipelines", "Interpretability: mechanistic circuit mapping, feature probing", "Agent Runtime Governance: sandboxed interpreters, declarative Open Policy Agent (OPA) gates"]
+                  }
+                ].map((layer, idx) => {
+                  const isExp = trkExp === `layer_${idx}`;
+                  return (
+                    <div key={layer.level} style={{ background: "rgba(255,255,255,0.01)", border: `1px solid ${isExp ? layer.color + "33" : "rgba(255,255,255,0.04)"}`, borderRadius: "8px", overflow: "hidden", transition: "all 0.2s" }} className="rm-card">
+                      <div style={{ display: "flex", alignItems: "center", justify: "space-between", padding: "10px 12px", cursor: "pointer" }} onClick={() => setTrkExp(isExp ? null : `layer_${idx}`)}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                          <span style={{ fontSize: "10px", fontWeight: "800", color: layer.color, background: `${layer.color}15`, padding: "2px 6px", borderRadius: "4px", border: `1px solid ${layer.color}25` }}>{layer.level}</span>
+                          <span style={{ fontSize: "12px", fontWeight: "700", color: T1 }}>{layer.name}</span>
+                        </div>
+                        <span style={{ color: isExp ? layer.color : T3, fontSize: "9px" }}>{isExp ? "▲" : "▼"}</span>
+                      </div>
+                      {isExp && (
+                        <div style={{ padding: "12px", borderTop: "1px solid rgba(255,255,255,0.04)", background: "rgba(0,0,0,0.15)" }}>
+                          <div style={{ fontSize: "11px", color: T2, lineHeight: "1.6", marginBottom: "8px" }}>{layer.desc}</div>
+                          <div style={{ fontSize: "9px", letterSpacing: "1px", color: T3, fontWeight: "800", textTransform: "uppercase", marginBottom: "6px" }}>Core Competency Targets</div>
+                          {layer.bullets.map((b, bi) => (
+                            <div key={bi} style={{ display: "flex", gap: "6px", alignItems: "flex-start", marginBottom: "4px" }}>
+                              <span style={{ color: layer.color, fontSize: "9px", marginTop: "2px" }}>▪</span>
+                              <span style={{ fontSize: "11px", color: T2 }}>{b}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* The 24 Differentiators Dynamic Grid */}
+            <div style={{ background: CARD, border: `1px solid ${BDR}`, borderRadius: "11px", padding: "16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexWrap: "wrap", gap: "8px" }}>
+                <div style={{ fontSize: "10px", letterSpacing: "1.5px", color: "#FBBF24", fontWeight: "700", textTransform: "uppercase" }}>⚡ The 24 Differentiators of the Top 1%</div>
+                <div style={{ display: "flex", gap: "4px" }}>
+                  {["all", "mindset", "execution", "leverage"].map(cat => (
+                    <button key={cat} onClick={() => { setEliteActiveCategory(cat); setEliteExpandedDifferentiator(null); }} className="rm-btn" style={{ fontSize: "9px", padding: "3px 8px", borderRadius: "4px", background: eliteActiveCategory === cat ? "rgba(251, 191, 36, 0.15)" : "transparent", color: eliteActiveCategory === cat ? "#FBBF24" : T3, fontWeight: "600", textTransform: "capitalize" }}>
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "8px" }}>
+                {[
+                  {
+                    id: 1, cat: "mindset", title: "First Principles", tag: "Challenge assumptions",
+                    desc: "Deconstruct problems to their core physical and logical truths. Never say 'that's how we always do it.'",
+                    practice: "When learning a new technology (e.g. Docker), list its core dependencies (cgroups, namespaces, union file systems) and explain how they construct the isolation layer."
+                  },
+                  {
+                    id: 2, cat: "mindset", title: "Systems Thinking", tag: "Map entire flow loops",
+                    desc: "Understand that no component exists in isolation. Analyze the feedback loop of the user journey, network paths, and runtime gates.",
+                    practice: "Draw and detail the entire flow of an LLM query, detailing token delays, TCP handshakes, vLLM scheduling, and DB retrieval overhead."
+                  },
+                  {
+                    id: 3, cat: "mindset", title: "Build Mental Models", tag: "Reject surface syntax",
+                    desc: "Don't memorize API methods. Understand the memory layout, hashing collisions, resizing triggers, and file system limits.",
+                    practice: "Implement a basic custom hash table with closed addressing/chaining from scratch in C or Python to fully model lookup bottlenecks."
+                  },
+                  {
+                    id: 4, cat: "mindset", title: "Learn to Learn", tag: "Study technical history",
+                    desc: "Deconstruct why a tool was created, what came before it, what issues it resolved, and what exact tradeoffs it introduced.",
+                    practice: "Compare REST, gRPC, and WebSockets. Note down exactly when and why you should select one over the others."
+                  },
+                  {
+                    id: 5, cat: "mindset", title: "Obsess Over Fundamentals", tag: "Stable layers compound",
+                    desc: "Frameworks die; algorithms, operating systems, networks, and databases remain constant over decades.",
+                    practice: "Dedicate 80% of your foundational study to Linux processes, memory virtualization, TCP transport states, and SQL transaction levels."
+                  },
+                  {
+                    id: 6, cat: "mindset", title: "Pattern Recognition", tag: "Signal to pattern maps",
+                    desc: "Train your brain to recognize the architectural and algorithmic signature of problems inside 60 seconds.",
+                    practice: "When studying problems, actively group them. If you see 'longest subarray without repeats', think sliding window instantly."
+                  },
+                  {
+                    id: 7, cat: "mindset", title: "Learn Tradeoffs", tag: "No free lunches",
+                    desc: "Every design choice is a strict compromise. Weigh speed vs consistency, read vs write overhead, cost vs availability.",
+                    practice: "Whenever you propose an architecture, force yourself to write three clear negative tradeoffs of your proposed approach."
+                  },
+                  {
+                    id: 8, cat: "mindset", title: "Build Taste", tag: "Aesthetic & design standards",
+                    desc: "Cultivate high standards for API simplicity, descriptive naming, modular design, and robust test hygiene.",
+                    practice: "Read through polished open-source libraries like FastAPI, or Rust's standard library, observing how cleanly variables are named."
+                  },
+                  {
+                    id: 9, cat: "execution", title: "Read Source Code", tag: "Ultimate primary source",
+                    desc: "Spend as much time reading production open-source code (e.g., PyTorch, vLLM, Langchain) as you do reading tutorials.",
+                    practice: "Clone an open-source tool you use. Trace a single function call end-to-end through its raw GitHub files."
+                  },
+                  {
+                    id: 10, cat: "execution", title: "Elite Debugging", tag: "Master diagnostics",
+                    desc: "Become a detective. Master tracing, profilers (cProfile, valgrind), lock inspectors, and packet capture tools.",
+                    practice: "Solve a complex bug by writing detailed tracing logs and analyzing CPU usage plots, rather than randomly changing code."
+                  },
+                  {
+                    id: 11, cat: "execution", title: "Great Reading", tag: "Primary sources first",
+                    desc: "Consume official manuals, RFC specifications, architectural whitepapers, and arXiv papers over passive videos.",
+                    practice: "When learning about HTTP/2, read the official RFC specification directly rather than a blog summarizing it."
+                  },
+                  {
+                    id: 12, cat: "execution", title: "Clear Communication", tag: "Force multiplier",
+                    desc: "If you cannot explain it clearly to a junior, you do not understand it. Practice writing precise technical copy.",
+                    practice: "Write an Architecture Decision Record (ADR) for every flagship project, explaining options and the selected path."
+                  },
+                  {
+                    id: 13, cat: "execution", title: "Ask Better Questions", tag: "Inquiry with context",
+                    desc: "Never ask open-ended questions like 'Why does this fail?' Show your logs, tried hypotheses, and precise execution context.",
+                    practice: "Write questions in the format: 'Goal -> Expected -> Observed -> Hypothesis -> Traced Experiment 1, 2, 3 -> Precise blocker.'"
+                  },
+                  {
+                    id: 14, cat: "execution", title: "Tech Blog Weekly", tag: "Learn scale lessons",
+                    desc: "Read engineering articles from scale-leaders (Stripe, Cloudflare, Netflix, Airbnb) to study real production issues.",
+                    practice: "Subscribe to and read at least one article a week from Cloudflare or Stripe, taking notes on how they handle reliability."
+                  },
+                  {
+                    id: 15, cat: "execution", title: "Measure Everything", tag: "Data over intuition",
+                    desc: "Do not guess latency, memory footprint, or database performance. Instrument and monitor your system's load metrics.",
+                    practice: "Add OpenTelemetry tracers to your local Express server and plot TTFT and memory overhead on every API request."
+                  },
+                  {
+                    id: 16, cat: "execution", title: "Journal Failures", tag: "Compound your mistakes",
+                    desc: "Log every major bug, its root cause, how you resolved it, and what guardrails would prevent it from happening again.",
+                    practice: "Maintain a simple private Markdown log of 'Engineering Failures' with detailed post-mortems and lessons."
+                  },
+                  {
+                    id: 17, cat: "leverage", title: "Understand Scale", tag: "Build for compounding concurrency",
+                    desc: "Always design systems by asking what breaks at 10 users, 10,000 users, and 10 million concurrent active connections.",
+                    practice: "Benchmark your local Node/Express database routes under artificial load with tools like autocannon or k6."
+                  },
+                  {
+                    id: 18, cat: "leverage", title: "Think Like a Maintainer", tag: "Write code for human readers",
+                    desc: "Code is read 10x more than it's written. Write clean, self-documenting code with comprehensive assertions and unit tests.",
+                    practice: "Review your own code after 3 weeks. If any section requires you to scratch your head, rewrite it for clarity."
+                  },
+                  {
+                    id: 19, cat: "leverage", title: "Failure First", tag: "Anticipate faults",
+                    desc: "Assume anything that can fail will fail. Build clean retry limits, exponential backoffs, circuit breakers, and state recoverability.",
+                    practice: "Inject artificial network drops into your database connection and verify your app handles it with an elegant retry loop."
+                  },
+                  {
+                    id: 20, cat: "leverage", title: "Reliability Focus", tag: "Predictable under load",
+                    desc: "A feature isn't complete when it runs once. It's complete when it behaves predictably under high concurrency and failure states.",
+                    practice: "Write stress tests for your API, checking memory leak profiles over 12 hours of steady mock requests."
+                  },
+                  {
+                    id: 21, cat: "leverage", title: "Compounding Skills", tag: "Select foundational topics",
+                    desc: "Focus on topics that unlock downstream subjects. For example, mastering Linux system calls makes Docker and Kubernetes intuitive.",
+                    practice: "Map out your study timeline to ensure foundations (networking, OS) are solid before exploring high-level abstractions."
+                  },
+                  {
+                    id: 22, cat: "leverage", title: "Engineering Judgment", tag: "Weigh operational tradeoffs",
+                    desc: "Avoid the trap of premature optimization. Balance engineering complexity with business requirements. Simplest is best.",
+                    practice: "Choose simple SQLite or local filesystem solutions over distributed databases if data complexity is low."
+                  },
+                  {
+                    id: 23, cat: "leverage", title: "Build Known Profile", tag: "Pre-empt opportunities",
+                    desc: "Contribute to popular open-source repos, write public post-mortems, and establish your technical identity before you apply.",
+                    practice: "Write and publish a deep breakdown on Hashnode about how you optimized an inference engine or designed an agent proxy."
+                  },
+                  {
+                    id: 24, cat: "leverage", title: "High-Leverage Work", tag: "Avoid busywork",
+                    desc: "Differentiate between real learning and passive consumption. Focus on activities with high compounding returns over years.",
+                    practice: "Instead of watching another 4-hour tutorial, build a complex distributed queue system from scratch and write a design doc."
+                  }
+                ].filter(item => eliteActiveCategory === "all" || item.cat === eliteActiveCategory).map(item => {
+                  const isExp = eliteExpandedDifferentiator === item.id;
+                  return (
+                    <div key={item.id} onClick={() => setEliteExpandedDifferentiator(isExp ? null : item.id)} style={{ background: isExp ? CARD2 : "rgba(255,255,255,0.015)", border: `1px solid ${isExp ? "#FBBF24" : "rgba(255,255,255,0.04)"}`, borderRadius: "8px", padding: "10px 12px", cursor: "pointer", transition: "all 0.22s ease", display: "flex", flexDirection: "column", gap: "4px", boxShadow: isExp ? "0 0 12px rgba(251, 191, 36, 0.08)" : "none" }} className="rm-card">
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <span style={{ fontSize: "12px", fontWeight: "700", color: isExp ? "#FBBF24" : T1 }}>{item.title}</span>
+                        <span style={{ fontSize: "7.5px", background: item.cat === "mindset" ? "rgba(34, 211, 238, 0.08)" : item.cat === "execution" ? "rgba(167, 139, 250, 0.08)" : "rgba(52, 211, 153, 0.08)", color: item.cat === "mindset" ? "#22D3EE" : item.cat === "execution" ? "#A78BFA" : "#34D399", padding: "1px 5px", borderRadius: "3px", fontWeight: "700", textTransform: "uppercase" }}>{item.cat}</span>
+                      </div>
+                      <div style={{ fontSize: "10px", color: T3, fontStyle: "italic" }}>{item.tag}</div>
+                      {isExp && (
+                        <div style={{ fontSize: "11px", color: T2, marginTop: "6px", lineHeight: "1.55" }}>
+                          {item.desc}
+                          <div style={{ marginTop: "10px", background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,255,255,0.04)", borderRadius: "6px", padding: "8px 10px" }}>
+                            <div style={{ fontSize: "8.5px", color: "#FBBF24", fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>🔧 HOW TO PRACTICE IT</div>
+                            <div style={{ fontSize: "10.5px", color: T2 }}>{item.practice}</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* STATEFUL INTERACTIVE CHECKLIST */}
+            <div style={{ background: CARD, border: `1px solid ${BDR}`, borderRadius: "11px", padding: "16px" }}>
+              {(() => {
+                const totalChecks = 20;
+                const checkedCount = Object.keys(eliteDone).filter(k => eliteDone[k]).length;
+                const pctChecked = Math.round((checkedCount / totalChecks) * 100);
+                
+                const toggleCheck = (id) => {
+                  const updated = { ...eliteDone, [id]: !eliteDone[id] };
+                  setEliteDone(updated);
+                  ls.set("rmx_elite_done", updated);
+                  triggerSaveSync();
+                };
+
+                const checklistCategories = [
+                  {
+                    name: "🧠 KNOWLEDGE STANDARDS",
+                    color: "#22D3EE",
+                    items: [
+                      { id: "e1", txt: "Ecosystem Familiarity", sub: "Fluent with systems tradeoffs of Python, C/C++, TypeScript, SQL, Bash, Go, and Rust." },
+                      { id: "e2", txt: "Security Fundamentals", sub: "Understands OAuth flows, securely store JWT tokens, TLS encryption, API security gates, and sandboxing." },
+                      { id: "e3", txt: "Business & Cost Basics", sub: "Understands SaaS metrics (LTV, CAC, gross margin) and how computing infrastructure choices directly affect margins." },
+                      { id: "e4", txt: "Product Alignment", sub: "Translates product features into concrete engineering metrics and prioritizes roadmap based on business tradeoffs." }
+                    ]
+                  },
+                  {
+                    name: "🛠️ CAPABILITY STANDARDS",
+                    color: "#A78BFA",
+                    items: [
+                      { id: "e5", txt: "Reading Large Codebases", sub: "Active execution-flow tracing and commit-history study inside major open-source repositories." },
+                      { id: "e6", txt: "Official Specs & Docs First", sub: "Rejecting video loops; always read the official manual specs and API docs first." },
+                      { id: "e7", txt: "Scale Blog Summaries", sub: "Read and document scale, downtime, and performance write-ups from Stripe, Netflix, and Cloudflare." },
+                      { id: "e8", txt: "arXiv Research Literacy", sub: "Analyzing distributed systems and machine learning arXiv papers for core assumptions and runtime viability." },
+                      { id: "e9", txt: "Critiquing Complex Architectures", sub: "Spotting bottlenecks, single-points-of-failure, and scalability caps in proposed network architectures." },
+                      { id: "e10", txt: "Performance Intuition", sub: "Predicting complexity classes, memory boundaries, and network overhead prior to execution." },
+                      { id: "e11", txt: "Fermi Calculations (Estimates)", sub: "Calculating bandwidth, API costs, memory overhead, and storage profiles roughly on the back of an envelope." },
+                      { id: "e12", txt: "Architecture Records (ADRs)", sub: "Writing precise design docs, tradeoff logs, and RFCs prior to writing feature codes." },
+                      { id: "e13", txt: "End-to-End Containers", sub: "Shipping fully containerized systems with automated CI build pipelines and testing suites." },
+                      { id: "e14", txt: "Perform Technical Reviews", sub: "Conducting code reviews focusing on typing precision, race conditions, edge-case leaks, and performance." },
+                      { id: "e15", txt: "Asking High-Caliber Questions", sub: "Framing technical questions with deep tracing contexts, tried theories, and boundary bounds." },
+                      { id: "e16", txt: "Systematic Error Logs", sub: "Journaling debugging post-mortems, identifying systemic flaws, and applying permanent coding habit patches." }
+                    ]
+                  },
+                  {
+                    name: "🏆 REPUTATION & INDUSTRY BRAND",
+                    color: "#34D399",
+                    items: [
+                      { id: "e17", txt: "Professional Habit Integrity", sub: "Descriptive semantic git logs, clean changelogs, branch protection, and robust test pipelines." },
+                      { id: "e18", txt: "Simplification of Tradeoffs", sub: "Communicating complex architectural choices simply, clearly articulating tradeoffs to both business and dev teams." },
+                      { id: "e19", txt: "Frontier Ecosystem Tracking", sub: "Tracking major model architectures, hardware constraints, and emerging open protocols like MCP." },
+                      { id: "e20", txt: "Highly Verifiable Specialization", sub: "Maintaining a clean professional identity (e.g., 'I optimize low-latency distributed inference engines')." }
+                    ]
+                  }
+                ];
+
+                return (
+                  <div>
+                    {/* Mastery score indicator */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+                      <div>
+                        <div style={{ fontSize: "10px", letterSpacing: "1.5px", color: "#FBBF24", fontWeight: "700", textTransform: "uppercase" }}>🏆 Elite Mastery Readiness Checklist</div>
+                        <div style={{ fontSize: "11px", color: T3, marginTop: "2px" }}>Progress: {checkedCount} of {totalChecks} milestones completed</div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ fontSize: "14px", fontWeight: "800", color: "#FBBF24" }}>{pctChecked}%</span>
+                        <div style={{ width: "80px", height: "6px", background: "rgba(255,255,255,0.04)", borderRadius: "3px", overflow: "hidden" }}>
+                          <div style={{ width: `${pctChecked}%`, height: "100%", background: "linear-gradient(90deg, #FBBF24, #10F5A0)", transition: "width 0.4s ease" }} />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                      {checklistCategories.map(cat => (
+                        <div key={cat.name}>
+                          <div style={{ fontSize: "9px", letterSpacing: "1px", color: cat.color, fontWeight: "800", marginBottom: "8px", textTransform: "uppercase" }}>{cat.name}</div>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "8px" }}>
+                            {cat.items.map(item => {
+                              const checked = !!eliteDone[item.id];
+                              return (
+                                <div key={item.id} onClick={() => toggleCheck(item.id)} style={{ background: "rgba(255,255,255,0.01)", border: `1px solid ${checked ? cat.color + "35" : "rgba(255,255,255,0.03)"}`, borderRadius: "8px", padding: "10px 12px", cursor: "pointer", transition: "all 0.18s ease", display: "flex", gap: "10px", alignItems: "flex-start" }} className="rm-card">
+                                  <div style={{ width: "15px", height: "15px", borderRadius: "3px", border: `1px solid ${checked ? cat.color : T3}`, background: checked ? `${cat.color}15` : "transparent", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", color: cat.color, flexShrink: 0, marginTop: "1px" }}>{checked ? "✓" : ""}</div>
+                                  <div>
+                                    <div style={{ fontSize: "11px", fontWeight: "700", color: checked ? T1 : T2, transition: "color 0.2s" }}>{item.txt}</div>
+                                    <div style={{ fontSize: "9.5px", color: T3, marginTop: "2px", lineHeight: "1.4" }}>{item.sub}</div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* WEEKLY RITUAL TRACKER */}
+            <div style={{ background: CARD, border: `1px solid ${BDR}`, borderRadius: "11px", padding: "16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                <div>
+                  <div style={{ fontSize: "10px", letterSpacing: "1.5px", color: "#FBBF24", fontWeight: "700", textTransform: "uppercase" }}>📅 Interactive Weekly Habit Ritual</div>
+                  <div style={{ fontSize: "10px", color: T3, marginTop: "2px" }}>Complete these 10 actions every week. Compound your progress.</div>
+                </div>
+                <button onClick={() => { if(confirm("Reset weekly habits?")) { setWeeklyHabits({}); ls.set("rmx_weekly_habits", {}); triggerSaveSync(); } }} className="rm-btn" style={{ fontSize: "9px", padding: "3px 8px", background: "rgba(239, 68, 68, 0.08)", border: "1px solid rgba(239, 68, 68, 0.2)", borderRadius: "4px", color: "#EF4444", fontWeight: "700" }}>
+                  RESET WEEK
+                </button>
+              </div>
+
+              {(() => {
+                const habitsList = [
+                  "Deep-dive one core concept from first principles.",
+                  "Read official documentation/specifications for a tool you are using.",
+                  "Explore and trace part of a large open-source codebase.",
+                  "Read and take notes on one engineering blog post or arXiv research paper.",
+                  "Solve DSA practice problems with emphasis on problem signal mapping.",
+                  "Review code (someone else's repository or your own previous code).",
+                  "Write a short technical markdown note summarizing key lessons.",
+                  "Deconstruct and analyze one real-world software system architecture.",
+                  "Reflect on one engineering error and document habit patches.",
+                  "Stay informed on frontier model releases and open-source updates."
+                ];
+
+                const toggleHabit = (idx) => {
+                  const updated = { ...weeklyHabits, [idx]: !weeklyHabits[idx] };
+                  setWeeklyHabits(updated);
+                  ls.set("rmx_weekly_habits", updated);
+                  triggerSaveSync();
+                };
+
+                const activeCount = habitsList.filter((_, idx) => !!weeklyHabits[idx]).length;
+
+                return (
+                  <div>
+                    <div style={{ gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", display: "grid", gap: "7px", marginBottom: "12px" }}>
+                      {habitsList.map((habit, idx) => {
+                        const checked = !!weeklyHabits[idx];
+                        return (
+                          <div key={idx} onClick={() => toggleHabit(idx)} style={{ background: "rgba(255,255,255,0.01)", border: `1px solid ${checked ? "#FBBF2445" : "rgba(255,255,255,0.03)"}`, borderRadius: "8px", padding: "10px 12px", cursor: "pointer", transition: "all 0.18s ease", display: "flex", gap: "10px", alignItems: "flex-start" }} className="rm-card">
+                            <div style={{ width: "15px", height: "15px", borderRadius: "3px", border: `1px solid ${checked ? "#FBBF24" : T3}`, background: checked ? "rgba(251, 191, 36, 0.15)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "9px", color: "#FBBF24", flexShrink: 0, marginTop: "1px" }}>{checked ? "✓" : ""}</div>
+                            <span style={{ fontSize: "11px", color: checked ? T1 : T2, transition: "color 0.2s" }}>{habit}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div style={{ fontSize: "10px", color: T3, textAlign: "right" }}>Weekly score: {activeCount} / 10 habits completed</div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* THE SUNDAY SELF-REFLECTION DIARY */}
+            <div style={{ background: CARD, border: `1px solid ${BDR}`, borderRadius: "11px", padding: "16px" }}>
+              <div style={{ marginBottom: "12px" }}>
+                <div style={{ fontSize: "10px", letterSpacing: "1.5px", color: "#FBBF24", fontWeight: "700", textTransform: "uppercase" }}>📓 The Sunday Reflection Diary</div>
+                <div style={{ fontSize: "10px", color: T3, marginTop: "2px" }}>Every Sunday, ask yourself these 6 questions. Take written logs of your development.</div>
+              </div>
+
+              {(() => {
+                const questions = [
+                  { key: "q1", label: "What did I deeply understand this week from first principles?" },
+                  { key: "q2", label: "What core assumption did I actively challenge?" },
+                  { key: "q3", label: "What specific system can I now explain end-to-end to a junior?" },
+                  { key: "q4", label: "What did I build that improved my professional engineering habits?" },
+                  { key: "q5", label: "What concrete feedback did I act on?" },
+                  { key: "q6", label: "What can I do next week that compounds over the next three years?" }
+                ];
+
+                const handleAnswerChange = (key, val) => {
+                  const updated = { ...eliteSundayAnswers, [key]: val };
+                  setEliteSundayAnswers(updated);
+                  ls.set("rmx_sunday_answers", updated);
+                  triggerSaveSync();
+                };
+
+                return (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "12px" }}>
+                    {questions.map(q => (
+                      <div key={q.key} style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                        <span style={{ fontSize: "11px", fontWeight: "700", color: T1 }}>{q.label}</span>
+                        <textarea
+                          value={eliteSundayAnswers[q.key] || ""}
+                          onChange={(e) => handleAnswerChange(q.key, e.target.value)}
+                          placeholder="Type your reflection here..."
+                          style={{
+                            width: "100%",
+                            height: "65px",
+                            background: "rgba(5, 14, 30, 0.5)",
+                            border: "1px solid rgba(255, 255, 255, 0.05)",
+                            borderRadius: "6px",
+                            padding: "8px",
+                            color: T2,
+                            fontSize: "11px",
+                            fontFamily: "var(--font-sans)",
+                            resize: "none",
+                            outline: "none",
+                            transition: "border-color 0.2s"
+                          }}
+                          onFocus={(e) => e.target.style.borderColor = "rgba(251, 191, 36, 0.4)"}
+                          onBlur={(e) => e.target.style.borderColor = "rgba(255, 255, 255, 0.05)"}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           </div>
         )}
