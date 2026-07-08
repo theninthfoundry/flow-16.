@@ -52,6 +52,22 @@ select{appearance:none;cursor:pointer}
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+@keyframes deathStarOrbit {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) translateX(30vw) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg) translateX(30vw) rotate(-360deg);
+  }
+}
+@keyframes deathStarGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 15px rgba(56, 189, 248, 0.15)) drop-shadow(0 0 2px rgba(255, 255, 255, 0.1));
+  }
+  50% {
+    filter: drop-shadow(0 0 35px rgba(16, 245, 160, 0.45)) drop-shadow(0 0 6px rgba(16, 245, 160, 0.2));
+  }
+}
 @keyframes nebulaDriftA {
   0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
   50% { transform: translate(60px, -40px) scale(1.15) rotate(90deg); }
@@ -65,18 +81,54 @@ select{appearance:none;cursor:pointer}
   50% { transform: translate(-50px, -50px) scale(1.2) rotate(120deg); }
 }
 @keyframes spaceChaseTIE {
-  0% { transform: translate(-180px, 20vh) scale(0.5) rotate(15deg); opacity: 0; }
-  2% { opacity: 0.85; }
-  45% { transform: translate(45vw, 15vh) scale(0.7) rotate(5deg); opacity: 0.85; }
-  90% { opacity: 0.85; }
-  100% { transform: translate(110vw, 25vh) scale(0.5) rotate(20deg); opacity: 0; }
+  0% {
+    transform: translate(-150px, 15vh) scale(0.4) rotate(12deg);
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.85;
+  }
+  25% {
+    transform: translate(25vw, 32vh) scale(0.65) rotate(-8deg);
+  }
+  50% {
+    transform: translate(52vw, 12vh) scale(0.8) rotate(18deg);
+  }
+  75% {
+    transform: translate(78vw, 28vh) scale(0.65) rotate(-5deg);
+  }
+  95% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translate(115vw, 10vh) scale(0.4) rotate(15deg);
+    opacity: 0;
+  }
 }
 @keyframes spaceChaseXWing {
-  0% { transform: translate(-280px, 21vh) scale(0.48) rotate(12deg); opacity: 0; }
-  3% { opacity: 0.9; }
-  45% { transform: translate(43vw, 16vh) scale(0.68) rotate(4deg); opacity: 0.9; }
-  90% { opacity: 0.9; }
-  100% { transform: translate(110vw, 26vh) scale(0.48) rotate(18deg); opacity: 0; }
+  0% {
+    transform: translate(-220px, 18vh) scale(0.38) rotate(10deg);
+    opacity: 0;
+  }
+  7% {
+    opacity: 0.9;
+  }
+  27% {
+    transform: translate(22vw, 34vh) scale(0.63) rotate(-10deg);
+  }
+  52% {
+    transform: translate(49vw, 14vh) scale(0.78) rotate(20deg);
+  }
+  77% {
+    transform: translate(75vw, 30vh) scale(0.63) rotate(-7deg);
+  }
+  94% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(115vw, 13vh) scale(0.38) rotate(12deg);
+    opacity: 0;
+  }
 }
 @keyframes dynamicShootingStar {
   0% { transform: translate(0, 0) scaleX(0); opacity: 0; }
@@ -85,18 +137,54 @@ select{appearance:none;cursor:pointer}
   50%, 100% { transform: translate(-450px, 450px) scaleX(0.2); opacity: 0; }
 }
 @keyframes tieGlide {
-  0% { transform: translate(-150px, 35vh) scale(0.35) rotate(-5deg); opacity: 0; }
-  5% { opacity: 0.9; }
-  50% { transform: translate(50vw, 42vh) scale(0.65) rotate(5deg); opacity: 0.9; }
-  95% { opacity: 0.9; }
-  100% { transform: translate(110vw, 48vh) scale(0.35) rotate(-2deg); opacity: 0; }
+  0% {
+    transform: translate(-150px, 45vh) scale(0.3) rotate(15deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 0.9;
+  }
+  30% {
+    transform: translate(30vw, 38vh) scale(0.55) rotate(-12deg);
+  }
+  60% {
+    transform: translate(65vw, 52vh) scale(0.75) rotate(10deg);
+  }
+  85% {
+    transform: translate(90vw, 42vh) scale(0.55) rotate(-5deg);
+  }
+  95% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(115vw, 48vh) scale(0.3) rotate(8deg);
+    opacity: 0;
+  }
 }
 @keyframes xWingClimb {
-  0% { transform: translate(110vw, 92vh) scale(0.28) rotate(-35deg); opacity: 0; }
-  6% { opacity: 0.95; }
-  50% { transform: translate(45vw, 55vh) scale(0.68) rotate(-28deg); opacity: 0.95; }
-  94% { opacity: 0.95; }
-  100% { transform: translate(-15vw, 15vh) scale(0.32) rotate(-38deg); opacity: 0; }
+  0% {
+    transform: translate(115vw, 85vh) scale(0.3) rotate(-40deg);
+    opacity: 0;
+  }
+  6% {
+    opacity: 0.95;
+  }
+  30% {
+    transform: translate(80vw, 68vh) scale(0.55) rotate(-25deg);
+  }
+  60% {
+    transform: translate(45vw, 50vh) scale(0.75) rotate(-35deg);
+  }
+  85% {
+    transform: translate(15vw, 25vh) scale(0.55) rotate(-20deg);
+  }
+  94% {
+    opacity: 0.95;
+  }
+  100% {
+    transform: translate(-15vw, 10vh) scale(0.3) rotate(-30deg);
+    opacity: 0;
+  }
 }
 .rm-fade{animation:fadeUp .32s cubic-bezier(.4,0,.2,1) both}
 .rm-slide{animation:slideDown .24s cubic-bezier(.4,0,.2,1) both}
@@ -469,317 +557,615 @@ function Md({text,color}){
   );
 }
 
+// ============================================================================
+// PREMIUM HIGH-FIDELITY STAR WARS ELEMENT REPLICAS
+// ============================================================================
+
+function FactionIcon({ name, size = 16, color = "currentColor", className = "", style = {} }) {
+  if (name === "rebel") {
+    return (
+      <svg width={size} height={size} viewBox="0 0 100 100" fill="none" className={className} style={{ display: "inline-block", verticalAlign: "middle", ...style }}>
+        {/* Rebel Alliance Phoenix Crest - precise curves matching exact logo */}
+        <path d="M50,85 C35,85 24,73 22,58 C32,61 41,54 44,43 C39,40 34,32 33,23 C35,26 38,28 42,28 C42,20 45,12 50,7 C55,12 58,20 58,28 C62,28 65,26 67,23 C66,32 61,40 56,43 C59,54 68,61 78,58 C76,73 65,85 50,85 Z" fill={color}/>
+      </svg>
+    );
+  }
+  if (name === "empire") {
+    return (
+      <svg width={size} height={size} viewBox="0 0 100 100" fill="none" className={className} style={{ display: "inline-block", verticalAlign: "middle", ...style }}>
+        {/* Galactic Empire 6-spoke Crest - precise cog geometry */}
+        <path d="M50,10 C28,10 10,28 10,50 C10,72 28,90 50,90 C72,90 90,72 90,50 C90,28 72,10 50,10 Z M50,16 C53.5,16 57,17 60,18.7 L56,25.5 C54.2,24.5 52.2,24 50,24 C47.8,24 45.8,24.5 44,25.5 L40,18.7 C43,17 46.5,16 50,16 Z M26.2,25.2 C28.5,23.3 31.2,21.8 34.2,20.8 L34.2,28.8 C32.8,29.4 31.5,30.3 30.4,31.4 L23.6,27.4 C24.4,26.6 25.3,25.9 26.2,25.2 Z M16,50 C16,46.5 17,43 18.7,40 L25.5,44 C24.5,45.8 24,47.8 24,50 C24,52.2 24.5,54.2 25.5,56 L18.7,60 C17,57 16,53.5 16,50 Z M26.2,74.8 C25.3,74.1 24.4,73.4 23.6,72.6 L30.4,68.6 C31.5,69.7 32.8,70.6 34.2,71.2 L34.2,79.2 C31.2,78.2 28.5,76.7 26.2,74.8 Z M50,84 C46.5,84 43,83 40,81.3 L44,74.5 C45.8,75.5 47.8,76 50,76 C52.2,76 54.2,75.5 56,74.5 L60,81.3 C57,83 53.5,84 50,84 Z M73.8,74.8 C71.5,76.7 68.8,78.2 65.8,79.2 L65.8,71.2 C67.2,70.6 68.5,69.7 69.6,68.6 L76.4,72.6 C75.6,73.4 74.7,74.1 73.8,74.8 Z M84,50 C84,53.5 83,57 81.3,60 L74.5,56 C75.5,54.2 76,52.2 76,50 C76,47.8 75.5,45.8 74.5,44 L81.3,40 C83,43 84,46.5 84,50 Z M73.8,25.2 C74.7,25.9 75.6,26.6 76.4,27.4 L69.6,31.4 C68.5,30.3 67.2,29.4 65.8,28.8 L65.8,20.8 C68.8,21.8 71.5,23.3 73.8,25.2 Z" fill={color}/>
+      </svg>
+    );
+  }
+  if (name === "jedi") {
+    return (
+      <svg width={size} height={size} viewBox="0 0 100 100" fill="none" className={className} style={{ display: "inline-block", verticalAlign: "middle", ...style }}>
+        {/* Jedi Order Winged Lightsaber Symbol - extremely detailed */}
+        <path d="M50,12 C51.5,12 52,19 52,36 L52,65 C52,66 51,67 50,67 C49,67 48,66 48,65 L48,36 C48,19 48.5,12 50,12 Z M50,69 C51,69 52,70 52,71 L52,83 C52,84 51,85 50,85 C49,85 48,84 48,83 L48,71 C48,70 49,69 50,69 Z M50,45 C55,42 63,38 71,36 C67,49 59,62 50,68 C41,62 33,49 29,36 C37,38 45,42 50,45 Z M50,56 C52,53 57,50 63,49 C60,56 56,62 50,65 C44,62 40,56 37,49 C43,50 48,53 50,56 Z" fill={color}/>
+      </svg>
+    );
+  }
+  if (name === "mando") {
+    return (
+      <svg width={size} height={size} viewBox="0 0 100 100" fill="none" className={className} style={{ display: "inline-block", verticalAlign: "middle", ...style }}>
+        {/* Mandalorian Mythosaur Skull - premium curves */}
+        <path d="M50,12 C48,12 45,17 45,25 C45,33 48,38 39,41 C34,43 27,40 23,44 C19,48 17,56 21,64 C24,70 31,71 33,68 C35,65 35,60 37,60 C39,60 40,64 41,73 C42,82 47,84 50,84 C53,84 58,82 59,73 C60,64 61,60 63,60 C65,60 65,65 67,68 C69,71 76,70 79,64 C83,56 81,48 77,44 C73,40 66,43 61,41 C52,38 55,33 55,25 C55,17 52,12 50,12 Z M50,19 C51,19 52,21 52,25 C52,29 51,31 50,31 C49,31 48,29 48,25 C48,21 49,19 50,19 Z M45,44 L39,54 L43,54 Z M55,44 L57,54 L61,54 Z" fill={color}/>
+      </svg>
+    );
+  }
+  return null;
+}
+
+function MillenniumFalconSVG({ width = 115, height = 100, className = "", style = {} }) {
+  return (
+    <svg width={width} height={height} viewBox="0 0 160 140" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+      {/* Dynamic Cyan Sublight Engine Exhaust Loop */}
+      <path d="M 46 112 C 60 123, 100 123, 114 112" stroke="#22d3ee" strokeWidth="8" strokeLinecap="round" filter="drop-shadow(0 0 12px #22d3ee)" opacity="0.85" />
+      <path d="M 49 111 C 61 119, 99 119, 111 111" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
+
+      {/* Main Saucer Disc Hull */}
+      <circle cx="80" cy="72" r="44" fill="#cbd5e1" stroke="#334155" strokeWidth="1.5" />
+      <circle cx="80" cy="72" r="34" fill="#94a3b8" stroke="#475569" strokeWidth="1" />
+
+      {/* Surface armor panel variation & weathering */}
+      <path d="M 44 46 A 44 44 0 0 1 116 46 L 106 52 A 34 34 0 0 0 54 52 Z" fill="#64748b" opacity="0.75" />
+      
+      {/* Crimson decals/accents exactly as Millennium Falcon Image 1 */}
+      <path d="M 39 62 L 43 55 L 51 59 L 47 67 Z" fill="#b91c1c" />
+      <path d="M 121 62 L 117 55 L 109 59 L 113 67 Z" fill="#b91c1c" />
+      <path d="M 74 108 L 86 108 L 84 100 L 76 100 Z" fill="#b91c1c" />
+      <path d="M 94 95 L 102 90 L 98 85 L 90 90 Z" fill="#475569" />
+
+      {/* Twin Front Forward Mandibles with canonical inner details */}
+      {/* Left Mandible */}
+      <path d="M 45 56 L 45 12 L 62 12 L 68 46 Z" fill="#cbd5e1" stroke="#334155" strokeWidth="1.5" />
+      <path d="M 49 16 L 49 42 L 58 42 L 58 16 Z" fill="#475569" stroke="#334155" strokeWidth="0.8" />
+      <rect x="51" y="20" width="4" height="14" fill="#1e293b" />
+      
+      {/* Right Mandible */}
+      <path d="M 115 56 L 115 12 L 98 12 L 92 46 Z" fill="#cbd5e1" stroke="#334155" strokeWidth="1.5" />
+      <path d="M 111 16 L 111 42 L 102 42 L 102 16 Z" fill="#475569" stroke="#334155" strokeWidth="0.8" />
+      <rect x="105" y="20" width="4" height="14" fill="#1e293b" />
+
+      {/* Central mandible tray gap & launcher */}
+      <rect x="68" y="28" width="24" height="10" fill="#1e293b" stroke="#475569" strokeWidth="1" />
+      <circle cx="80" cy="33" r="3.5" fill="#475569" />
+      <line x1="68" y1="33" x2="92" y2="33" stroke="#334155" />
+
+      {/* Right-Mounted Outrigger Cockpit Cabin - Falcon's unique asymmetry */}
+      <path d="M 118 68 L 142 58 L 146 40 L 132 43 L 118 58 Z" fill="#cbd5e1" stroke="#334155" strokeWidth="1.5" />
+      <path d="M 132 43 L 146 40 L 150 24 L 136 30 Z" fill="#475569" stroke="#334155" strokeWidth="1.2" />
+      <path d="M 139 32 L 146 29 L 147 34 L 141 36 Z" fill="#38bdf8" opacity="0.8" />
+      <path d="M 141 36 L 147 34 L 145 40 L 139 40 Z" fill="#38bdf8" opacity="0.8" />
+
+      {/* Portside Circular Radar Antenna (Rectangular dish version from sequels or circular) */}
+      <ellipse cx="56" cy="48" rx="8" ry="5.5" fill="#94a3b8" stroke="#334155" strokeWidth="1.2" transform="rotate(-15 56 48)" />
+      <path d="M 56 48 L 48 40" stroke="#334155" strokeWidth="1.5" />
+      <rect x="46" y="38" width="4" height="4" fill="#475569" />
+
+      {/* Core Quad-Laser Cannons Turret */}
+      <circle cx="80" cy="70" r="8" fill="#475569" stroke="#334155" strokeWidth="1.2" />
+      <line x1="77" y1="70" x2="77" y2="48" stroke="#f8fafc" strokeWidth="2" />
+      <line x1="83" y1="70" x2="83" y2="48" stroke="#f8fafc" strokeWidth="2" />
+      <rect x="75" y="55" width="10" height="2" fill="#ef4444" />
+
+      {/* Circular cooling vents at rear exhaust */}
+      <circle cx="64" cy="92" r="3.5" fill="#1e293b" stroke="#475569" />
+      <circle cx="74" cy="96" r="3.5" fill="#1e293b" stroke="#475569" />
+      <circle cx="86" cy="96" r="3.5" fill="#1e293b" stroke="#475569" />
+      <circle cx="96" cy="92" r="3.5" fill="#1e293b" stroke="#475569" />
+    </svg>
+  );
+}
+
+function StarDestroyerSVG({ width = 220, height = 130, className = "", style = {} }) {
+  return (
+    <svg width={width} height={height} viewBox="0 0 180 110" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+      {/* Majestic Sublight Engine Thrusters Glow */}
+      <circle cx="152" cy="38" r="5" fill="#38bdf8" filter="drop-shadow(0 0 8px #38bdf8)" />
+      <circle cx="152" cy="55" r="7.5" fill="#7dd3fc" filter="drop-shadow(0 0 12px #38bdf8)" />
+      <circle cx="152" cy="72" r="5" fill="#38bdf8" filter="drop-shadow(0 0 8px #38bdf8)" />
+
+      {/* Main Wedge triangular Hull Structure */}
+      <polygon points="8,55 150,12 150,98" fill="#94a3b8" stroke="#334155" strokeWidth="1.5" />
+      
+      {/* Tiered surface plating details */}
+      <polygon points="24,55 148,20 148,90" fill="#cbd5e1" opacity="0.9" />
+      <polygon points="40,55 146,28 146,82" fill="#64748b" opacity="0.4" />
+      
+      {/* Elevated central spine terraces */}
+      <polygon points="62,55 144,36 144,74" fill="#475569" stroke="#334155" strokeWidth="1" />
+      <polygon points="84,55 142,42 142,68" fill="#334155" />
+
+      {/* Massive Command Bridge Tower structure */}
+      <rect x="112" y="40" width="34" height="30" fill="#475569" stroke="#334155" strokeWidth="1" />
+      <rect x="107" y="44" width="44" height="8" fill="#334155" />
+      
+      {/* T-Neck and Shield Generator Globes */}
+      <rect x="122" y="30" width="14" height="10" fill="#64748b" stroke="#334155" strokeWidth="1" />
+      <polygon points="110,30 148,30 142,22 116,22" fill="#475569" stroke="#334155" strokeWidth="1" />
+      
+      <circle cx="123" cy="18" r="4" fill="#cbd5e1" stroke="#334155" strokeWidth="0.8" />
+      <circle cx="135" cy="18" r="4" fill="#cbd5e1" stroke="#334155" strokeWidth="0.8" />
+      <line x1="123" y1="18" x2="123" y2="22" stroke="#334155" />
+      <line x1="135" y1="18" x2="135" y2="22" stroke="#334155" />
+
+      {/* Middle side trench dividing line with hangar lights */}
+      <line x1="8" y1="55" x2="150" y2="55" stroke="#334155" strokeWidth="1.2" />
+      <line x1="15" y1="55" x2="148" y2="55" stroke="#fef08a" strokeWidth="1" strokeDasharray="1,5" opacity="0.85" filter="drop-shadow(0 0 2px #eab308)" />
+
+      {/* Surface grid panel detail lines */}
+      <line x1="45" y1="41" x2="148" y2="20" stroke="#334155" strokeWidth="0.8" opacity="0.4" />
+      <line x1="45" y1="69" x2="148" y2="90" stroke="#334155" strokeWidth="0.8" opacity="0.4" />
+    </svg>
+  );
+}
+
+function XWingSVG({ width = 95, height = 90, className = "", style = {} }) {
+  return (
+    <svg width={width} height={height} viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+      {/* Double firing laser beams from wingtips */}
+      <line x1="15" y1="13" x2="-80" y2="13" stroke="#ef4444" strokeWidth="2.5" strokeDasharray="14,16" opacity="0.9" filter="drop-shadow(0 0 8px #ef4444)" />
+      <line x1="15" y1="87" x2="-80" y2="87" stroke="#ef4444" strokeWidth="2.5" strokeDasharray="14,16" opacity="0.9" filter="drop-shadow(0 0 8px #ef4444)" />
+
+      {/* Long Nose Cone fuselage */}
+      <path d="M 115 50 L 35 42 L 35 58 Z" fill="#f1f5f9" stroke="#475569" strokeWidth="1.5" />
+      <path d="M 115 50 L 80 46 L 80 54 Z" fill="#cbd5e1" />
+      
+      {/* Cockpit Canopy */}
+      <path d="M 54 45 L 75 45 L 67 55 L 50 55 Z" fill="#334155" stroke="#38bdf8" strokeWidth="1" />
+      <rect x="58" y="46" width="10" height="4.5" fill="#0ea5e9" opacity="0.6" />
+
+      {/* Blue R2-D2 Droid Socket unit behind pilot */}
+      <circle cx="45" cy="44" r="3" fill="#cbd5e1" stroke="#1d4ed8" strokeWidth="0.6" />
+      <circle cx="45" cy="44" r="1.5" fill="#3b82f6" />
+
+      {/* Upper Wings (Split S-foils structure) with red squadron markers */}
+      <path d="M 42 45 L 18 15 L 12 18 L 36 49 Z" fill="#f1f5f9" stroke="#475569" strokeWidth="1.2" />
+      <path d="M 28 27 L 24 22 L 20 25 L 24 30 Z" fill="#dc2626" />
+
+      {/* Lower Wings */}
+      <path d="M 42 55 L 18 85 L 12 82 L 36 51 Z" fill="#f1f5f9" stroke="#475569" strokeWidth="1.2" />
+      <path d="M 28 73 L 24 78 L 20 75 L 24 70 Z" fill="#dc2626" />
+
+      {/* Background Wing planes for split depth */}
+      <path d="M 48 45 L 26 23 L 22 26 L 42 49 Z" fill="#94a3b8" stroke="#334155" />
+      <path d="M 48 55 L 26 77 L 22 74 L 42 51 Z" fill="#94a3b8" stroke="#334155" />
+
+      {/* Four Cylinder Engine roots and red-hot exhaust nozzles */}
+      <circle cx="43" cy="37" r="5" fill="#1e293b" stroke="#cbd5e1" strokeWidth="1.2" />
+      <circle cx="43" cy="63" r="5" fill="#1e293b" stroke="#cbd5e1" strokeWidth="1.2" />
+      <circle cx="49" cy="37" r="3" fill="#ef4444" filter="drop-shadow(0 0 4px #ef4444)" />
+      <circle cx="49" cy="63" r="3" fill="#ef4444" filter="drop-shadow(0 0 4px #ef4444)" />
+
+      {/* Long wingtip laser canons extending forward */}
+      <rect x="5" y="11" width="16" height="3" fill="#475569" stroke="#334155" />
+      <line x1="5" y1="12.5" x2="22" y2="12.5" stroke="#cbd5e1" strokeWidth="1.5" />
+      <circle cx="2" cy="12.5" r="1.5" fill="#ef4444" filter="drop-shadow(0 0 3px #ef4444)" />
+
+      <rect x="5" y="86" width="16" height="3" fill="#475569" stroke="#334155" />
+      <line x1="5" y1="87.5" x2="22" y2="87.5" stroke="#cbd5e1" strokeWidth="1.5" />
+      <circle cx="2" cy="87.5" r="1.5" fill="#ef4444" filter="drop-shadow(0 0 3px #ef4444)" />
+
+      <circle cx="41" cy="50" r="6" fill="#334155" stroke="#94a3b8" />
+    </svg>
+  );
+}
+
+function DeathStarSVG({ size = 180, className = "", style = {} }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+      {/* Base Spherical Core */}
+      <circle cx="100" cy="100" r="92" fill="#1e293b" stroke="#475569" strokeWidth="2.2" />
+      <circle cx="100" cy="100" r="92" fill="url(#dsMetalGrad)" />
+
+      {/* Concave Superlaser Focus Dish */}
+      <ellipse cx="140" cy="62" rx="22" ry="16" fill="#0f172a" stroke="#475569" strokeWidth="1.5" transform="rotate(-15 140 62)" />
+      <ellipse cx="140" cy="62" rx="14" ry="10" fill="#334155" stroke="#64748b" strokeWidth="1" transform="rotate(-15 140 62)" />
+      <circle cx="140" cy="62" r="3.5" fill="#10f5a0" filter="drop-shadow(0 0 5px #10f5a0)" />
+
+      {/* Firing Tributary Laser Beams converging */}
+      <line x1="124" y1="55" x2="140" y2="62" stroke="#10f5a0" strokeWidth="0.8" opacity="0.8" />
+      <line x1="156" y1="55" x2="140" y2="62" stroke="#10f5a0" strokeWidth="0.8" opacity="0.8" />
+      <line x1="130" y1="73" x2="140" y2="62" stroke="#10f5a0" strokeWidth="0.8" opacity="0.8" />
+      <line x1="150" y1="73" x2="140" y2="62" stroke="#10f5a0" strokeWidth="0.8" opacity="0.8" />
+      <line x1="140" y1="62" x2="80" y2="105" stroke="#10f5a0" strokeWidth="1.5" opacity="0.35" strokeDasharray="3,6" filter="drop-shadow(0 0 4px #10f5a0)" />
+
+      {/* Horizontal Equatorial Trench split */}
+      <path d="M 8 100 Q 100 102 192 100" stroke="#0f172a" strokeWidth="3" fill="none" />
+      <path d="M 8 100 Q 100 102 192 100" stroke="#475569" strokeWidth="1" fill="none" />
+
+      {/* Grid segments and meridians lines */}
+      <path d="M 100 8 A 92 92 0 0 1 100 92" stroke="#334155" strokeWidth="0.8" fill="none" opacity="0.5" />
+      <path d="M 35 40 C 60 60, 140 60, 165 40" stroke="#334155" strokeWidth="0.8" fill="none" opacity="0.4" />
+      <path d="M 20 60 C 50 80, 150 80, 180 60" stroke="#334155" strokeWidth="0.8" fill="none" opacity="0.4" />
+
+      <path d="M 100 108 A 92 92 0 0 1 100 192" stroke="#334155" strokeWidth="0.8" fill="none" opacity="0.5" />
+      <path d="M 35 140 C 60 160, 140 160, 165 140" stroke="#334155" strokeWidth="0.8" fill="none" opacity="0.4" />
+      <path d="M 20 160 C 50 180, 150 180, 180 160" stroke="#334155" strokeWidth="0.8" fill="none" opacity="0.4" />
+
+      {/* Scattered city light points representing superstation activity */}
+      <circle cx="45" cy="45" r="1.1" fill="#fef08a" opacity="0.9" />
+      <circle cx="72" cy="35" r="1.1" fill="#fef08a" opacity="0.95" />
+      <circle cx="110" cy="25" r="1.1" fill="#38bdf8" opacity="0.9" />
+      <circle cx="85" cy="70" r="1.3" fill="#38bdf8" opacity="0.85" />
+      <circle cx="155" cy="125" r="1.1" fill="#fef08a" opacity="0.9" />
+      <circle cx="112" cy="155" r="1.1" fill="#38bdf8" opacity="0.95" />
+      <circle cx="68" cy="165" r="1.1" fill="#fef08a" opacity="0.9" />
+      <circle cx="160" cy="160" r="1.3" fill="#38bdf8" opacity="0.8" />
+      <circle cx="35" cy="115" r="1.1" fill="#38bdf8" opacity="0.9" />
+
+      <defs>
+        <radialGradient id="dsMetalGrad" cx="30%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="transparent" />
+          <stop offset="55%" stopColor="#0f172a" stopOpacity="0.45" />
+          <stop offset="100%" stopColor="#020617" stopOpacity="0.95" />
+        </radialGradient>
+      </defs>
+    </svg>
+  );
+}
+
+function TieFighterSVG({ width = 85, height = 90, className = "", style = {} }) {
+  return (
+    <svg width={width} height={height} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} style={style}>
+      {/* Green Kyber Laser Blaster Bolt from center cannons */}
+      <line x1="50" y1="52" x2="180" y2="52" stroke="#10f5a0" strokeWidth="2.5" strokeDasharray="14,16" opacity="0.9" filter="drop-shadow(0 0 8px #10f5a0)" />
+      
+      {/* Left Hexagonal Solar Wing Grid Panel */}
+      <polygon points="12,15 22,5 22,95 12,85" fill="#0f172a" stroke="#475569" strokeWidth="1.5" />
+      <polygon points="14,20 20,12 20,88 14,80" fill="#1e293b" />
+      <line x1="12" y1="50" x2="22" y2="50" stroke="#475569" strokeWidth="1" />
+      <line x1="17" y1="10" x2="17" y2="90" stroke="#475569" strokeWidth="1" />
+      
+      {/* Left Wing connector pylon strut */}
+      <rect x="22" y="47" width="16" height="6" fill="#64748b" stroke="#334155" strokeWidth="1" />
+      <line x1="22" y1="50" x2="38" y2="50" stroke="#1e293b" strokeWidth="1" />
+
+      {/* Main Spherical Cockpit Pod */}
+      <circle cx="50" cy="50" r="16" fill="#cbd5e1" stroke="#334155" strokeWidth="1.5" />
+      
+      {/* Viewport mesh panel segmentation details */}
+      <circle cx="50" cy="50" r="11" fill="#475569" stroke="#1e293b" strokeWidth="1" />
+      <circle cx="50" cy="50" r="4" fill="#090d16" stroke="#475569" strokeWidth="0.8" />
+      <line x1="50" y1="39" x2="50" y2="61" stroke="#1e293b" strokeWidth="1.2" />
+      <line x1="39" y1="50" x2="61" y2="50" stroke="#1e293b" strokeWidth="1.2" />
+      <line x1="42.2" y1="42.2" x2="57.8" y2="57.8" stroke="#1e293b" strokeWidth="0.8" />
+      <line x1="42.2" y1="57.8" x2="57.8" y2="42.2" stroke="#1e293b" strokeWidth="0.8" />
+
+      {/* Twin Chin Laser Cannons with glowing red lights */}
+      <circle cx="47" cy="58" r="1.5" fill="#ef4444" filter="drop-shadow(0 0 3px #ef4444)" />
+      <circle cx="53" cy="58" r="1.5" fill="#ef4444" filter="drop-shadow(0 0 3px #ef4444)" />
+      
+      {/* Right Wing connector pylon strut */}
+      <rect x="62" y="47" width="16" height="6" fill="#64748b" stroke="#334155" strokeWidth="1" />
+      <line x1="62" y1="50" x2="78" y2="50" stroke="#1e293b" strokeWidth="1" />
+
+      {/* Right Hexagonal Solar Wing Grid Panel */}
+      <polygon points="88,15 78,5 78,95 88,85" fill="#0f172a" stroke="#475569" strokeWidth="1.5" />
+      <polygon points="86,20 80,12 80,88 86,80" fill="#1e293b" />
+      <line x1="78" y1="50" x2="88" y2="50" stroke="#475569" strokeWidth="1" />
+      <line x1="83" y1="10" x2="83" y2="90" stroke="#475569" strokeWidth="1" />
+    </svg>
+  );
+}
+
 function UniverseBackground() {
-  const [scrollOffset, setScrollOffset] = useState(0);
-  const [scrollVelocity, setScrollVelocity] = useState(0);
-  const [shootingStars, setShootingStars] = useState([]);
-
+  const canvasRef = useRef(null);
+  
+  // Track viewport scrolling and velocity
+  const scrollYRef = useRef(0);
+  const velocityRef = useRef(0);
+  const smoothedVelocityRef = useRef(0);
   const lastScrollY = useRef(0);
-  const lastTime = useRef(Date.now());
-  const velocityTimeout = useRef(null);
+  const lastScrollTime = useRef(Date.now());
+  const scrollTimeout = useRef(null);
 
-  // Generate 3 layers of stars for deep parallax scrolling with speed stretch coefficients
-  const layers = useState(() => {
-    const colors = ["star-glow-white", "star-glow-blue", "star-glow-pink", "star-glow-amber"];
-    
-    // Layer 1: Distant Stars (dim, small, slow scroll)
-    const l1 = [];
-    for (let i = 0; i < 90; i++) {
-      l1.push({
-        id: `l1-${i}`,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: Math.random() * 0.8 + 0.5,
-        delay: Math.random() * 10,
-        duration: Math.random() * 5 + 4,
-        color: "star-glow-white",
-        opacity: Math.random() * 0.4 + 0.2,
-        layerFactor: 2.0
-      });
-    }
-
-    // Layer 2: Mid Stars (colorful, medium size & glow, medium scroll)
-    const l2 = [];
-    for (let i = 0; i < 50; i++) {
-      l2.push({
-        id: `l2-${i}`,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: Math.random() * 1.5 + 0.8,
-        delay: Math.random() * 8,
-        duration: Math.random() * 4 + 3,
-        color: colors[Math.floor(Math.random() * 2) + 1], // blue or pink mostly
-        opacity: Math.random() * 0.6 + 0.3,
-        layerFactor: 4.5
-      });
-    }
-
-    // Layer 3: Foreground Stars (large, highly glowing, fast scroll)
-    const l3 = [];
-    for (let i = 0; i < 20; i++) {
-      l3.push({
-        id: `l3-${i}`,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        size: Math.random() * 2.5 + 1.5,
-        delay: Math.random() * 6,
-        duration: Math.random() * 3 + 2,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        opacity: Math.random() * 0.75 + 0.4,
-        layerFactor: 8.5
-      });
-    }
-
-    return { l1, l2, l3 };
-  })[0];
-
-  // Random trigger function for high-quality SVG shooting stars
-  const triggerShootingStar = useCallback(() => {
-    const id = Math.random().toString();
-    const startX = Math.random() * 75 + 15; // 15% to 90% range
-    const startY = Math.random() * 35 + 8;  // 8% to 43% range
-    const angle = Math.random() * 15 - 45; // -45 to -30 degrees
-    const length = Math.random() * 140 + 90; // 90px to 230px
-    const duration = Math.random() * 1.0 + 1.2; // 1.2s to 2.2s
-
-    const newStar = {
-      id,
-      style: {
-        left: `${startX}%`,
-        top: `${startY}%`,
-        width: `${length}px`,
-        transform: `rotate(${angle}deg)`,
-        animationDuration: `${duration}s`
-      }
-    };
-
-    setShootingStars(prev => [...prev, newStar]);
-
-    // Clean up star from state after animation finishes
-    setTimeout(() => {
-      setShootingStars(prev => prev.filter(s => s.id !== id));
-    }, duration * 1000 + 100);
-  }, []);
+  // Background state vectors
+  const starsRef = useRef([]);
+  const nebulaeRef = useRef([]);
+  const shootingStarsRef = useRef([]);
 
   useEffect(() => {
-    // Parallax scroll handler + speed tracker
+    // Generate beautiful multi-layered starry space
+    const colors = ["#ffffff", "#38bdf8", "#f472b6", "#fbbf24", "#a78bfa", "#10f5a0"];
+    const tempStars = [];
+    
+    // Distant background stars (Layer 1) - small, dim, slowest scroll
+    for (let i = 0; i < 110; i++) {
+      tempStars.push({
+        x: Math.random(),
+        y: Math.random(),
+        size: Math.random() * 0.7 + 0.4,
+        color: "#ffffff",
+        baseOpacity: Math.random() * 0.4 + 0.2,
+        twinkleSpeed: 0.0006 + Math.random() * 0.0014,
+        twinklePhase: Math.random() * Math.PI * 2,
+        parallaxFactor: 0.045
+      });
+    }
+
+    // Mid-distance colorful stars (Layer 2) - medium size, colorful, medium scroll
+    for (let i = 0; i < 60; i++) {
+      tempStars.push({
+        x: Math.random(),
+        y: Math.random(),
+        size: Math.random() * 1.3 + 0.8,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        baseOpacity: Math.random() * 0.55 + 0.35,
+        twinkleSpeed: 0.001 + Math.random() * 0.002,
+        twinklePhase: Math.random() * Math.PI * 2,
+        parallaxFactor: 0.12
+      });
+    }
+
+    // High-intensity foreground stars (Layer 3) - large, highly glowing, fast scroll
+    for (let i = 0; i < 22; i++) {
+      tempStars.push({
+        x: Math.random(),
+        y: Math.random(),
+        size: Math.random() * 2.1 + 1.4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        baseOpacity: Math.random() * 0.65 + 0.45,
+        twinkleSpeed: 0.0018 + Math.random() * 0.0025,
+        twinklePhase: Math.random() * Math.PI * 2,
+        parallaxFactor: 0.25
+      });
+    }
+
+    starsRef.current = tempStars;
+
+    // Create 3 layered organic nebula clouds in the deep galaxy canvas
+    nebulaeRef.current = [
+      {
+        baseX: 0.18,
+        baseY: 0.28,
+        color: "rgba(124, 58, 237, 0.09)", // Deep violet gas
+        baseRadius: 0.4,
+        pulseSpeed: 0.0003,
+        pulsePhase: 0,
+        driftSpeedX: 0.00012,
+        driftSpeedY: 0.00008,
+      },
+      {
+        baseX: 0.82,
+        baseY: 0.68,
+        color: "rgba(34, 211, 238, 0.08)", // Cyan / turquoise cloud
+        baseRadius: 0.44,
+        pulseSpeed: 0.00022,
+        pulsePhase: Math.PI / 3,
+        driftSpeedX: -0.00009,
+        driftSpeedY: 0.00011,
+      },
+      {
+        baseX: 0.52,
+        baseY: 0.48,
+        color: "rgba(255, 45, 120, 0.06)", // Kyber pink gas
+        baseRadius: 0.34,
+        pulseSpeed: 0.00026,
+        pulsePhase: Math.PI * 1.5,
+        driftSpeedX: 0.00006,
+        driftSpeedY: -0.00008,
+      }
+    ];
+
     const handleScroll = () => {
       const currentY = window.scrollY;
-      setScrollOffset(currentY);
+      scrollYRef.current = currentY;
 
       const now = Date.now();
-      const dt = Math.max(1, now - lastTime.current);
+      const dt = Math.max(1, now - lastScrollTime.current);
       const dy = Math.abs(currentY - lastScrollY.current);
-      const vel = dy / dt; // speed in pixels/ms
-      
-      const cappedVel = Math.min(vel, 8);
-      if (cappedVel > 0.15) {
-        setScrollVelocity(cappedVel);
-      }
+      const instantVel = dy / dt; // speed in px/ms
+
+      // Soft ceiling clamp on the scrolling velocity
+      const capped = Math.min(instantVel * 1.4, 7.0);
+      velocityRef.current = capped;
 
       lastScrollY.current = currentY;
-      lastTime.current = now;
+      lastScrollTime.current = now;
 
-      if (velocityTimeout.current) {
-        cancelAnimationFrame(velocityTimeout.current);
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current);
       }
-      
-      const decay = () => {
-        setScrollVelocity(v => {
-          if (v <= 0.04) return 0;
-          const nextV = v * 0.82;
-          velocityTimeout.current = requestAnimationFrame(decay);
-          return nextV;
-        });
-      };
-      
-      velocityTimeout.current = requestAnimationFrame(decay);
+
+      // Smooth deceleration to 0 when scrolling halts
+      scrollTimeout.current = setTimeout(() => {
+        velocityRef.current = 0;
+      }, 140);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
 
-    // Periodically trigger a shooting star (every 6 to 10 seconds)
-    const interval = setInterval(() => {
-      if (Math.random() > 0.3) {
-        triggerShootingStar();
-      }
-    }, 7000);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    // Trigger one almost immediately
-    const initialTimeout = setTimeout(triggerShootingStar, 1500);
+    const ctx = canvas.getContext("2d");
+    let animationFrameId;
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    const render = () => {
+      const width = canvas.width;
+      const height = canvas.height;
+      const time = Date.now();
+
+      // Deep space abyss dark gradient layer
+      ctx.fillStyle = "#02040a";
+      ctx.fillRect(0, 0, width, height);
+
+      // Smooth velocity interpolation for the lightspeed stretch transition
+      smoothedVelocityRef.current += (velocityRef.current - smoothedVelocityRef.current) * 0.12;
+      
+      if (velocityRef.current === 0 && smoothedVelocityRef.current > 0) {
+        smoothedVelocityRef.current *= 0.86;
+        if (smoothedVelocityRef.current < 0.01) {
+          smoothedVelocityRef.current = 0;
+        }
+      }
+
+      const smoothedV = smoothedVelocityRef.current;
+
+      // 1. Draw slowly drifting glowing Nebulae
+      ctx.globalCompositeOperation = "screen";
+      nebulaeRef.current.forEach((neb, idx) => {
+        const pulse = 1 + 0.14 * Math.sin(time * neb.pulseSpeed + neb.pulsePhase);
+        const radius = Math.max(width, height) * neb.baseRadius * pulse;
+        
+        const driftX = Math.sin(time * neb.driftSpeedX) * width * 0.05;
+        const driftY = Math.cos(time * neb.driftSpeedY) * height * 0.05;
+        const cx = neb.baseX * width + driftX;
+        // Multi-layered subtle parallax depth reaction to user scrolling
+        const parallaxFactor = 0.03 + idx * 0.025;
+        const cy = neb.baseY * height + driftY - scrollYRef.current * parallaxFactor;
+
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
+        grad.addColorStop(0, neb.color);
+        grad.addColorStop(0.5, neb.color.replace(/[\d\.]+\)$/, "0.03)"));
+        grad.addColorStop(1, "transparent");
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, width, height);
+      });
+      ctx.globalCompositeOperation = "source-over";
+
+      // 2. Spawn and update high-quality Canvas-based Shooting Stars (Absolute paths, zero lines glitch)
+      if (Math.random() < 0.003 && shootingStarsRef.current.length < 4) {
+        const isCyan = Math.random() > 0.45;
+        shootingStarsRef.current.push({
+          x: Math.random() * width * 0.85 + width * 0.05,
+          y: Math.random() * height * 0.28,
+          vx: -5.0 - Math.random() * 4.0,
+          vy: 4.0 + Math.random() * 4.0,
+          length: 120 + Math.random() * 100,
+          color: isCyan ? "56, 189, 248" : "244, 114, 182", // Cyan or pink
+          life: 1.0,
+          decay: 0.012 + Math.random() * 0.012
+        });
+      }
+
+      // Update & render shooting stars
+      shootingStarsRef.current = shootingStarsRef.current.filter(ss => {
+        ss.x += ss.vx;
+        ss.y += ss.vy;
+        ss.life -= ss.decay;
+
+        if (ss.life <= 0) return false;
+
+        // Draw shooting star as a single clean high-speed dot with radial gradient blur,
+        // eliminating any trailing line artifacts/residue
+        const radius = 6 + ss.life * 12;
+        const grad = ctx.createRadialGradient(ss.x, ss.y, 0, ss.x, ss.y, radius);
+        grad.addColorStop(0, `rgba(255, 255, 255, ${ss.life})`);
+        grad.addColorStop(0.25, `rgba(${ss.color}, ${ss.life * 0.85})`);
+        grad.addColorStop(0.65, `rgba(${ss.color}, ${ss.life * 0.25})`);
+        grad.addColorStop(1, "transparent");
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(ss.x, ss.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        return true;
+      });
+
+      // 3. Draw Stars Layer with Parallax & Scroll-Triggered Hyperspace streak stretch
+      starsRef.current.forEach(star => {
+        const rawY = star.y * height - scrollYRef.current * star.parallaxFactor;
+        const starX = star.x * width;
+        const starY = (rawY % height + height) % height; // Seamless wrap
+
+        const twinkle = 0.4 + 0.6 * Math.sin(time * star.twinkleSpeed + star.twinklePhase);
+        const opacity = star.baseOpacity * twinkle;
+
+        if (smoothedV > 0.06) {
+          // Elongate stars vertically because user is scrolling
+          const stretchFactor = smoothedV * star.parallaxFactor * 105;
+          const tailY = starY - stretchFactor;
+
+          const grad = ctx.createLinearGradient(starX, tailY, starX, starY);
+          grad.addColorStop(0, "transparent");
+          if (star.color === "#ffffff") {
+            grad.addColorStop(0.5, `rgba(255, 255, 255, ${opacity * 0.45})`);
+            grad.addColorStop(1, `rgba(255, 255, 255, ${opacity})`);
+          } else if (star.color === "#38bdf8") {
+            grad.addColorStop(0.5, `rgba(56, 189, 248, ${opacity * 0.45})`);
+            grad.addColorStop(1, `rgba(255, 255, 255, ${opacity})`);
+          } else if (star.color === "#f472b6") {
+            grad.addColorStop(0.5, `rgba(244, 114, 182, ${opacity * 0.45})`);
+            grad.addColorStop(1, `rgba(255, 255, 255, ${opacity})`);
+          } else {
+            grad.addColorStop(0.5, `${star.color}40`);
+            grad.addColorStop(1, "#ffffff");
+          }
+
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = star.size * (1 + smoothedV * 0.08);
+          ctx.beginPath();
+          ctx.moveTo(starX, starY);
+          ctx.lineTo(starX, tailY);
+          ctx.stroke();
+
+          // Intense hyper-bright white streak core line
+          ctx.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+          ctx.lineWidth = Math.max(0.6, star.size * 0.35);
+          ctx.beginPath();
+          ctx.moveTo(starX, starY);
+          ctx.lineTo(starX, tailY);
+          ctx.stroke();
+
+        } else {
+          // Standard twinkling circular stars
+          ctx.fillStyle = star.color;
+          ctx.globalAlpha = opacity;
+          ctx.beginPath();
+          ctx.arc(starX, starY, star.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.globalAlpha = 1.0;
+        }
+      });
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      clearInterval(interval);
-      clearTimeout(initialTimeout);
-      if (velocityTimeout.current) {
-        cancelAnimationFrame(velocityTimeout.current);
-      }
+      window.removeEventListener("resize", resizeCanvas);
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+      cancelAnimationFrame(animationFrameId);
     };
-  }, [triggerShootingStar]);
-
-  const isLightspeed = scrollVelocity > 0.8;
+  }, []);
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
-      
-      {/* 1. Drift-animated Nebulae Cloud Layer (3 layers of glowing gas) */}
-      <div style={{
-        position: "absolute",
-        top: "-15%",
-        left: "-15%",
-        width: "75%",
-        height: "75%",
-        background: "radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, rgba(124, 58, 237, 0.03) 50%, transparent 70%)",
-        borderRadius: "50%",
-        filter: "blur(120px)",
-        animation: "nebulaDriftA 45s ease-in-out infinite",
-        mixBlendMode: "screen",
-        opacity: 0.8
-      }} />
+      {/* High-Resolution Animated space background canvas */}
+      <canvas ref={canvasRef} style={{ display: "block", width: "100%", height: "100%" }} />
 
+      {/* Death Star: Orbiting center with self-rotation and green/blue Kyber glow */}
       <div style={{
         position: "absolute",
-        bottom: "-20%",
-        right: "-10%",
-        width: "85%",
-        height: "85%",
-        background: "radial-gradient(circle, rgba(34, 211, 238, 0.1) 0%, rgba(34, 211, 238, 0.02) 45%, transparent 70%)",
-        borderRadius: "50%",
-        filter: "blur(140px)",
-        animation: "nebulaDriftB 58s ease-in-out infinite",
-        mixBlendMode: "screen",
-        opacity: 0.75
-      }} />
-
-      <div style={{
-        position: "absolute",
-        top: "25%",
-        left: "25%",
-        width: "65%",
-        height: "65%",
-        background: "radial-gradient(circle, rgba(255, 45, 120, 0.07) 0%, rgba(255, 45, 120, 0.01) 40%, transparent 65%)",
-        borderRadius: "50%",
-        filter: "blur(110px)",
-        animation: "nebulaDriftC 50s ease-in-out infinite",
-        mixBlendMode: "screen",
-        opacity: 0.85
-      }} />
-
-      {/* 2. Parallax Starfield Layer 1 (Distant - Factor 0.05) with Lightspeed stretch */}
-      <div style={{
-        position: "absolute",
-        inset: 0,
+        top: "50%",
+        left: "50%",
+        width: "200px",
+        height: "200px",
+        marginTop: "-100px",
+        marginLeft: "-100px",
+        animation: "deathStarOrbit 210s linear infinite, deathStarGlow 14s ease-in-out infinite",
+        zIndex: 1,
+        pointerEvents: "none"
       }}>
-        {layers.l1.map(s => {
-          const stretchY = 1 + scrollVelocity * s.layerFactor;
-          const squeezeX = isLightspeed ? Math.max(0.35, 1 - scrollVelocity * 0.12) : 1;
-          const starOpacity = isLightspeed ? Math.min(1.0, s.opacity * (1 + scrollVelocity * 0.4)) : s.opacity;
-          return (
-            <div
-              key={s.id}
-              className={`star ${s.color}`}
-              style={{
-                left: `${s.x}%`,
-                top: `${s.y}%`,
-                width: `${s.size}px`,
-                height: `${s.size}px`,
-                animation: `twinkle ${s.duration}s ease-in-out infinite`,
-                animationDelay: `${s.delay}s`,
-                opacity: starOpacity,
-                transform: `translateY(${-scrollOffset * 0.05}px) scaleY(${stretchY}) scaleX(${squeezeX})`,
-                transformOrigin: "center center",
-                transition: "transform 0.08s ease-out, opacity 0.15s ease",
-                ...(isLightspeed ? {
-                  boxShadow: `0 0 ${8 + scrollVelocity * 4}px rgba(255, 255, 255, 0.8)`
-                } : {})
-              }}
-            />
-          );
-        })}
+        <DeathStarSVG size={180} style={{ animation: "slowRotate 260s linear infinite" }} />
       </div>
 
-      {/* 3. Parallax Starfield Layer 2 (Mid-distance - Factor 0.13) with Lightspeed stretch */}
-      <div style={{
-        position: "absolute",
-        inset: 0,
-      }}>
-        {layers.l2.map(s => {
-          const stretchY = 1 + scrollVelocity * s.layerFactor;
-          const squeezeX = isLightspeed ? Math.max(0.3, 1 - scrollVelocity * 0.14) : 1;
-          const starOpacity = isLightspeed ? Math.min(1.0, s.opacity * (1 + scrollVelocity * 0.5)) : s.opacity;
-          return (
-            <div
-              key={s.id}
-              className={`star ${s.color}`}
-              style={{
-                left: `${s.x}%`,
-                top: `${s.y}%`,
-                width: `${s.size}px`,
-                height: `${s.size}px`,
-                animation: `twinkle ${s.duration}s ease-in-out infinite`,
-                animationDelay: `${s.delay}s`,
-                opacity: starOpacity,
-                transform: `translateY(${-scrollOffset * 0.13}px) scaleY(${stretchY}) scaleX(${squeezeX})`,
-                transformOrigin: "center center",
-                transition: "transform 0.08s ease-out, opacity 0.15s ease",
-                ...(isLightspeed ? {
-                  boxShadow: `0 0 ${8 + scrollVelocity * 5}px ${s.color === "star-glow-blue" ? "#38bdf8" : "#f472b6"}`
-                } : {})
-              }}
-            />
-          );
-        })}
-      </div>
-
-      {/* 4. Parallax Starfield Layer 3 (Foreground - Factor 0.25) with Lightspeed stretch */}
-      <div style={{
-        position: "absolute",
-        inset: 0,
-      }}>
-        {layers.l3.map(s => {
-          const stretchY = 1 + scrollVelocity * s.layerFactor;
-          const squeezeX = isLightspeed ? Math.max(0.25, 1 - scrollVelocity * 0.16) : 1;
-          const starOpacity = isLightspeed ? Math.min(1.0, s.opacity * (1 + scrollVelocity * 0.6)) : s.opacity;
-          return (
-            <div
-              key={s.id}
-              className={`star ${s.color}`}
-              style={{
-                left: `${s.x}%`,
-                top: `${s.y}%`,
-                width: `${s.size}px`,
-                height: `${s.size}px`,
-                animation: `twinkle ${s.duration}s ease-in-out infinite`,
-                animationDelay: `${s.delay}s`,
-                opacity: starOpacity,
-                transform: `translateY(${-scrollOffset * 0.25}px) scaleY(${stretchY}) scaleX(${squeezeX})`,
-                transformOrigin: "center center",
-                transition: "transform 0.08s ease-out, opacity 0.15s ease",
-                ...(isLightspeed ? {
-                  boxShadow: `0 0 ${10 + scrollVelocity * 6}px ${s.color === "star-glow-blue" ? "#38bdf8" : s.color === "star-glow-pink" ? "#f472b6" : "#fbbf24"}`
-                } : {})
-              }}
-            />
-          );
-        })}
-      </div>
-
-      {/* 5. Passive / Fallback Shooting Stars */}
-      <div className="shooting-star-line" style={{ top: "15%", right: "20%", animation: "shoot 14s linear infinite", animationDelay: "1s" }} />
-      <div className="shooting-star-line" style={{ top: "45%", right: "10%", animation: "shoot 18s linear infinite", animationDelay: "6s" }} />
-      <div className="shooting-star-line" style={{ top: "30%", right: "35%", animation: "shoot 16s linear infinite", animationDelay: "11s" }} />
-
-      {/* 6. Active Interactive Shooting Stars */}
-      {shootingStars.map(s => (
-        <div
-          key={s.id}
-          className="dynamic-shooting-star"
-          style={s.style}
-        />
-      ))}
-
-      {/* 7. Imperial Star Destroyer (Looming majestic background sentinel) */}
+      {/* Imperial Star Destroyer (Looming background sentinel) */}
       <div style={{
         position: "absolute",
         bottom: "8%",
@@ -789,22 +1175,10 @@ function UniverseBackground() {
         animation: "floatShip1 36s ease-in-out infinite",
         filter: "drop-shadow(0 0 15px rgba(255,255,255,0.05))"
       }}>
-        <svg width="220" height="130" viewBox="0 0 180 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="10,55 140,15 140,95" fill="#1e293b" stroke="#334155" strokeWidth="1.5" />
-          <polygon points="25,55 140,30 140,80" fill="#0f172a" stroke="#475569" strokeWidth="1" />
-          <polygon points="90,55 135,42 135,68" fill="#1e293b" stroke="#475569" strokeWidth="1" />
-          <rect x="115" y="47" width="22" height="16" fill="#0f172a" stroke="#475569" strokeWidth="1" />
-          <circle cx="123" cy="42" r="3" fill="#334155" stroke="#475569" />
-          <circle cx="131" cy="42" r="3" fill="#334155" stroke="#475569" />
-          <rect x="120" y="43" width="12" height="4" fill="#64748b" />
-          <line x1="90" y1="55" x2="135" y2="55" stroke="#f59e0b" strokeWidth="1" strokeDasharray="3,6" opacity="0.6" />
-          <circle cx="143" cy="40" r="4.5" fill="#38bdf8" filter="drop-shadow(0 0 5px #38bdf8)" />
-          <circle cx="143" cy="55" r="5.5" fill="#38bdf8" filter="drop-shadow(0 0 7px #38bdf8)" />
-          <circle cx="143" cy="70" r="4.5" fill="#38bdf8" filter="drop-shadow(0 0 5px #38bdf8)" />
-        </svg>
+        <StarDestroyerSVG width="220" height="130" />
       </div>
 
-      {/* 8. Millennium Falcon (The legendary vessel, gently exploring the top-right) */}
+      {/* Millennium Falcon (Gentle exploration top-right) */}
       <div style={{
         position: "absolute",
         top: "6%",
@@ -813,21 +1187,10 @@ function UniverseBackground() {
         animation: "floatShip2 28s ease-in-out infinite",
         filter: "drop-shadow(0 0 16px rgba(56, 189, 248, 0.25))"
       }}>
-        <svg width="115" height="100" viewBox="0 0 110 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="55" cy="45" r="28" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
-          <circle cx="55" cy="45" r="18" fill="#0f172a" stroke="#334155" />
-          <path d="M 32 17 L 32 37 L 44 32 L 40 17 Z" fill="#1e293b" stroke="#475569" strokeWidth="1.2" />
-          <path d="M 66 17 L 70 32 L 78 37 L 78 17 Z" fill="#1e293b" stroke="#475569" strokeWidth="1.2" />
-          <rect x="46" y="22" width="18" height="8" rx="1" fill="#090d16" stroke="#334155" />
-          <path d="M 83 40 L 98 42 L 98 48 L 83 50 Z" fill="#1e293b" stroke="#475569" />
-          <rect x="91" y="43" width="6" height="4" rx="1" fill="#38bdf8" opacity="0.75" />
-          <circle cx="43" cy="38" r="5" fill="#334155" stroke="#475569" />
-          <line x1="43" y1="38" x2="39" y2="34" stroke="#94a3b8" />
-          <path d="M 35 71 C 45 74, 65 74, 75 71" stroke="#22d3ee" strokeWidth="3.5" strokeLinecap="round" filter="drop-shadow(0 0 7px #22d3ee)" />
-        </svg>
+        <MillenniumFalconSVG width="115" height="100" />
       </div>
 
-      {/* 9. Star Wars Space Chase: TIE Fighter (being chased!) */}
+      {/* Star Wars Space Chase: TIE Fighter (being chased!) */}
       <div style={{
         position: "absolute",
         inset: 0,
@@ -840,57 +1203,22 @@ function UniverseBackground() {
           animation: "spaceChaseTIE 18s linear infinite",
           animationDelay: "3s"
         }}>
-          <svg width="85" height="90" viewBox="0 0 85 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="42.5" y1="50" x2="160" y2="50" stroke="#10f5a0" strokeWidth="2" strokeDasharray="12,18" opacity="0.9" filter="drop-shadow(0 0 5px #10f5a0)" />
-            <polygon points="5,15 15,5 15,85 5,75" fill="#0f172a" stroke="#334155" strokeWidth="1.5" />
-            <polygon points="8,20 12,12 12,78 8,70" fill="#1e293b" />
-            <line x1="5" y1="45" x2="15" y2="45" stroke="#475569" strokeWidth="1" />
-            <line x1="10" y1="10" x2="10" y2="80" stroke="#475569" strokeWidth="1" />
-            <rect x="15" y="42" width="15" height="6" fill="#475569" stroke="#334155" strokeWidth="1" />
-            <circle cx="42.5" cy="45" r="16" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
-            <circle cx="42.5" cy="45" r="9" fill="#0f172a" stroke="#475569" strokeWidth="1" />
-            <line x1="42.5" y1="36" x2="42.5" y2="54" stroke="#475569" strokeWidth="1" />
-            <line x1="33.5" y1="45" x2="51.5" y2="45" stroke="#475569" strokeWidth="1" />
-            <circle cx="42.5" cy="45" r="3.5" fill="#334155" />
-            <circle cx="40.5" cy="51.5" r="1.2" fill="#ef4444" filter="drop-shadow(0 0 2px #ef4444)" />
-            <circle cx="44.5" cy="51.5" r="1.2" fill="#ef4444" filter="drop-shadow(0 0 2px #ef4444)" />
-            <rect x="55" y="42" width="15" height="6" fill="#475569" stroke="#334155" strokeWidth="1" />
-            <polygon points="80,15 70,5 70,85 80,75" fill="#0f172a" stroke="#334155" strokeWidth="1.5" />
-            <polygon points="77,20 73,12 73,78 77,70" fill="#1e293b" />
-            <line x1="70" y1="45" x2="80" y2="45" stroke="#475569" strokeWidth="1" />
-            <line x1="75" y1="10" x2="75" y2="80" stroke="#475569" strokeWidth="1" />
-          </svg>
+          <TieFighterSVG width="85" height="90" />
         </div>
 
-        {/* 10. Star Wars Space Chase: X-Wing (doing the chasing & firing!) */}
+        {/* Star Wars Space Chase: X-Wing (doing the chasing & firing!) */}
         <div style={{
           position: "absolute",
           top: 0,
           left: 0,
           animation: "spaceChaseXWing 18s linear infinite",
-          animationDelay: "3.4s" // lags perfectly behind to look like a chase!
+          animationDelay: "3.4s"
         }}>
-          <svg width="95" height="90" viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="10" y1="15" x2="-100" y2="15" stroke="#ff0000" strokeWidth="2" strokeDasharray="15,25" opacity="0.95" filter="drop-shadow(0 0 5px #ff0000)" />
-            <line x1="10" y1="75" x2="-100" y2="75" stroke="#ff0000" strokeWidth="2" strokeDasharray="15,25" opacity="0.95" filter="drop-shadow(0 0 5px #ff0000)" />
-            <path d="M 90 45 L 35 40 L 35 50 Z" fill="#1e293b" stroke="#475569" strokeWidth="1.2" />
-            <path d="M 50 42 L 65 42 L 60 48 L 48 48 Z" fill="#334155" stroke="#38bdf8" strokeWidth="1" />
-            <circle cx="56" cy="39" r="2.5" fill="#2563eb" />
-            <circle cx="56" cy="39" r="1.5" fill="#f8fafc" />
-            <path d="M 40 40 L 15 15 L 10 18 L 35 43 Z" fill="#334155" stroke="#475569" />
-            <path d="M 40 50 L 15 75 L 10 72 L 35 47 Z" fill="#334155" stroke="#475569" />
-            <path d="M 45 40 L 25 22 L 21 25 L 40 43 Z" fill="#1e293b" stroke="#334155" />
-            <path d="M 45 50 L 25 68 L 21 65 L 40 47 Z" fill="#1e293b" stroke="#334155" />
-            <rect x="5" y="13" width="12" height="3" fill="#64748b" />
-            <line x1="5" y1="14.5" x2="18" y2="14.5" stroke="#ff2d78" strokeWidth="1" />
-            <rect x="5" y="73" width="12" height="3" fill="#64748b" />
-            <line x1="5" y1="74.5" x2="18" y2="74.5" stroke="#ff2d78" strokeWidth="1" />
-            <circle cx="40" cy="45" r="6" fill="#1e293b" stroke="#ef4444" strokeWidth="1.5" />
-          </svg>
+          <XWingSVG width="95" height="90" />
         </div>
       </div>
 
-      {/* 11. Independent Gliding TIE Fighter (Glides periodically along fixed path) */}
+      {/* Independent Gliding TIE Fighter (Glides periodically) */}
       <div style={{
         position: "absolute",
         top: 0,
@@ -900,25 +1228,10 @@ function UniverseBackground() {
         filter: "drop-shadow(0 0 15px rgba(16, 245, 160, 0.15))",
         zIndex: 4
       }}>
-        <svg width="70" height="75" viewBox="0 0 85 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <line x1="42.5" y1="45" x2="180" y2="45" stroke="#10f5a0" strokeWidth="2.5" strokeDasharray="10,20" opacity="0.85" filter="drop-shadow(0 0 6px #10f5a0)" />
-          <polygon points="5,15 15,5 15,85 5,75" fill="#0f172a" stroke="#475569" strokeWidth="1.5" />
-          <polygon points="8,20 12,12 12,78 8,70" fill="#1e293b" />
-          <line x1="5" y1="45" x2="15" y2="45" stroke="#64748b" strokeWidth="1" />
-          <line x1="10" y1="10" x2="10" y2="80" stroke="#64748b" strokeWidth="1" />
-          <rect x="15" y="42" width="15" height="6" fill="#475569" stroke="#334155" strokeWidth="1" />
-          <circle cx="42.5" cy="45" r="15" fill="#1e293b" stroke="#64748b" strokeWidth="1.5" />
-          <circle cx="42.5" cy="45" r="8" fill="#0f172a" stroke="#475569" strokeWidth="1" />
-          <circle cx="42.5" cy="45" r="3" fill="#38bdf8" />
-          <rect x="55" y="42" width="15" height="6" fill="#475569" stroke="#334155" strokeWidth="1" />
-          <polygon points="80,15 70,5 70,85 80,75" fill="#0f172a" stroke="#475569" strokeWidth="1.5" />
-          <polygon points="77,20 73,12 73,78 77,70" fill="#1e293b" />
-          <line x1="70" y1="45" x2="80" y2="45" stroke="#64748b" strokeWidth="1" />
-          <line x1="75" y1="10" x2="75" y2="80" stroke="#64748b" strokeWidth="1" />
-        </svg>
+        <TieFighterSVG width="70" height="75" />
       </div>
 
-      {/* 12. Independent Climbing X-Wing (Emerges from bottom-right corner) */}
+      {/* Independent Climbing X-Wing (Emerges from bottom-right corner) */}
       <div style={{
         position: "absolute",
         top: 0,
@@ -928,23 +1241,7 @@ function UniverseBackground() {
         filter: "drop-shadow(0 0 15px rgba(239, 68, 68, 0.2))",
         zIndex: 4
       }}>
-        <svg width="80" height="75" viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <line x1="5" y1="14" x2="-120" y2="14" stroke="#ff3b30" strokeWidth="2" strokeDasharray="12,24" opacity="0.9" filter="drop-shadow(0 0 5px #ff3b30)" />
-          <line x1="5" y1="74" x2="-120" y2="74" stroke="#ff3b30" strokeWidth="2" strokeDasharray="12,24" opacity="0.9" filter="drop-shadow(0 0 5px #ff3b30)" />
-          <path d="M 85 45 L 30 38 L 30 52 Z" fill="#1e293b" stroke="#64748b" strokeWidth="1.2" />
-          <path d="M 45 42 L 60 42 L 55 48 L 43 48 Z" fill="#334155" stroke="#0ea5e9" strokeWidth="1" />
-          <circle cx="51" cy="40" r="2" fill="#2563eb" />
-          <circle cx="51" cy="40" r="1" fill="#f8fafc" />
-          <path d="M 35 40 L 10 12 L 6 15 L 30 43 Z" fill="#334155" stroke="#475569" />
-          <path d="M 35 50 L 10 78 L 6 75 L 30 47 Z" fill="#334155" stroke="#475569" />
-          <circle cx="33" cy="28" r="3.5" fill="#ef4444" filter="drop-shadow(0 0 3px #ef4444)" />
-          <circle cx="33" cy="62" r="3.5" fill="#ef4444" filter="drop-shadow(0 0 3px #ef4444)" />
-          <rect x="2" y="10" width="10" height="3" fill="#64748b" />
-          <line x1="2" y1="11.5" x2="15" y2="11.5" stroke="#ff2d78" strokeWidth="1" />
-          <rect x="2" y="76" width="10" height="3" fill="#64748b" />
-          <line x1="2" y1="77.5" x2="15" y2="77.5" stroke="#ff2d78" strokeWidth="1" />
-          <circle cx="35" cy="45" r="5" fill="#0f172a" stroke="#ef4444" strokeWidth="1.2" />
-        </svg>
+        <XWingSVG width="80" height="75" />
       </div>
 
     </div>
@@ -1436,6 +1733,8 @@ export default function App(){
 
   const isFirstRender = useRef(true);
 
+
+
   const triggerSaveSync = useCallback(() => {
     setSyncState("saving");
     const t = setTimeout(() => {
@@ -1673,8 +1972,22 @@ export default function App(){
             {/* Tab selection buttons with cloud sync status */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
               <div style={{ display: "flex", gap: "6px", overflowX: "auto" }} className="no-scrollbar">
-                {[["roadmap","🗺 Roadmap"], ["library","📚 Library"], ["tracks","⚡ Tracks"], ["progress","📊 Progress"]].map(([k,l])=>(
-                  <button key={k} className="rm-tab" onClick={()=>setTab(k)} style={ts(k)}>{l}</button>
+                {[
+                  { key: "roadmap", label: "Roadmap", icon: "rebel", color: "#FF2D78" },
+                  { key: "library", label: "Library", icon: "jedi", color: "#A78BFA" },
+                  { key: "tracks", label: "Tracks", icon: "mando", color: "#38bdf8" },
+                  { key: "progress", label: "Progress", icon: "empire", color: "#10F5A0" }
+                ].map(item => (
+                  <button
+                    key={item.key}
+                    className="rm-tab"
+                    onClick={() => setTab(item.key)}
+                    style={ts(item.key)}
+                    data-saber-color={item.color}
+                  >
+                    <FactionIcon name={item.icon} size={13} color={tab === item.key ? item.color : T2} style={{ marginRight: "6px", transition: "all 0.2s" }} />
+                    {item.label}
+                  </button>
                 ))}
               </div>
               
@@ -1749,7 +2062,12 @@ export default function App(){
                             color: active ? T1 : T2,
                             transition: "all 0.2s"
                           }}>
-                          {d === "All" ? "🔥 All Levels" : d} <span style={{fontSize:"8.5px", opacity: active ? 0.9 : 0.6, marginLeft:"3px"}}>({count})</span>
+                          {d === "All" ? (
+                            <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                              <FactionIcon name="rebel" size={11} color={active ? T1 : "#FF2D78"} />
+                              All Levels
+                            </span>
+                          ) : d} <span style={{fontSize:"8.5px", opacity: active ? 0.9 : 0.6, marginLeft:"3px"}}>({count})</span>
                         </button>
                       );
                     })}
@@ -1781,7 +2099,12 @@ export default function App(){
                             color: active ? T1 : T2,
                             transition: "all 0.2s"
                           }}>
-                          {dom === "All" ? "💻 All Domains" : dom} <span style={{fontSize:"8.5px", opacity: active ? 0.9 : 0.6, marginLeft:"3px"}}>({count})</span>
+                          {dom === "All" ? (
+                            <span style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                              <FactionIcon name="jedi" size={11} color={active ? T1 : "#22D3EE"} />
+                              All Domains
+                            </span>
+                          ) : dom} <span style={{fontSize:"8.5px", opacity: active ? 0.9 : 0.6, marginLeft:"3px"}}>({count})</span>
                         </button>
                       );
                     })}
@@ -1803,25 +2126,38 @@ export default function App(){
                   <BigRing p={phasePct(phase.id)} color={phase.c} size={58}/>
                 </div>
 
-                {MONTHS.filter(m=>m.phase===phase.id).map((month,idx)=>{
-                  const isMatch = matchesSearch(month, searchQuery);
-                  if (!isMatch) return null;
+                <div style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fill, minmax(310px, 1fr))",
+                  gap: "16px",
+                  justifyContent: "center",
+                  alignItems: "start",
+                  marginBottom: "20px"
+                }}>
+                  {MONTHS.filter(m=>m.phase===phase.id).map((month,idx)=>{
+                    const isMatch = matchesSearch(month, searchQuery);
+                    if (!isMatch) return null;
 
-                  const hasMatchingTopics = month.topics.some(topic => {
-                    const matchesDiff = selectedDiff === "All" || topic.diff === selectedDiff;
-                    const matchesDom = selectedDomain === "All" || getTopicDomain(topic, month) === selectedDomain;
-                    return matchesDiff && matchesDom;
-                  });
-                  if (!hasMatchingTopics) return null;
+                    const hasMatchingTopics = month.topics.some(topic => {
+                      const matchesDiff = selectedDiff === "All" || topic.diff === selectedDiff;
+                      const matchesDom = selectedDomain === "All" || getTopicDomain(topic, month) === selectedDomain;
+                      return matchesDiff && matchesDom;
+                    });
+                    if (!hasMatchingTopics) return null;
 
-                  const isExp = exp === month.month || (searchQuery.trim() !== "" && isMatch) || (selectedDiff !== "All" || selectedDomain !== "All");
-                  const p=pct(month,done);
-                  const ph=PHASES[month.phase-1];
-                  const isBkm=bkm[month.month];
-                  const comp=doneItems(month,done),tot=totalItems(month);
-                  return(
-                    <div key={month.month} style={{marginBottom:isExp?"0":"7px",animation:`fadeUp .28s ease ${idx*.05}s both`}}>
-                      <div className="rm-card" style={{background:isExp?CARD2:CARD,border:`1px solid ${isExp?ph.c+"45":BDR}`,borderRadius:isExp?"11px 11px 0 0":"11px",padding:"12px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:"10px",position:"relative",overflow:"hidden",boxShadow:isExp?`0 0 18px ${ph.glow}`:"none",transition:"all .22s ease"}} onClick={()=>setExp(isExp?null:month.month)}>
+                    const isExp = exp === month.month || (searchQuery.trim() !== "" && isMatch) || (selectedDiff !== "All" || selectedDomain !== "All");
+                    const p=pct(month,done);
+                    const ph=PHASES[month.phase-1];
+                    const isBkm=bkm[month.month];
+                    const comp=doneItems(month,done),tot=totalItems(month);
+                    return(
+                      <div key={month.month} style={{
+                        gridColumn: isExp ? "1 / -1" : "auto",
+                        animation: `fadeUp .28s ease ${idx*.05}s both`,
+                        display: "flex",
+                        flexDirection: "column"
+                      }}>
+                      <div className="rm-card" data-saber-color={ph.c} style={{background:isExp?CARD2:CARD,border:`1px solid ${isExp?ph.c+"45":BDR}`,borderRadius:isExp?"11px 11px 0 0":"11px",padding:"12px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:"10px",position:"relative",overflow:"hidden",boxShadow:isExp?`0 0 18px ${ph.glow}`:"none",transition:"all .22s ease"}} onClick={()=>setExp(isExp?null:month.month)}>
                         <div style={{position:"absolute",right:"10px",top:"-10px",fontSize:"72px",fontWeight:"900",color:`${ph.c}04`,lineHeight:1,pointerEvents:"none",userSelect:"none"}}>{String(month.month).padStart(2,"0")}</div>
                         <div style={{position:"absolute",left:0,top:0,bottom:0,width:"3px",background:`linear-gradient(180deg,${ph.c},${ph.c2})`,borderRadius:"11px 0 0 11px",boxShadow:isExp?`2px 0 8px ${ph.c}50`:"none",transition:"box-shadow .25s"}}/>
                         <div style={{width:"34px",height:"34px",borderRadius:"8px",background:`${ph.c}14`,border:`1px solid ${ph.c}28`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"800",color:ph.c,flexShrink:0,marginLeft:"7px",zIndex:1}}>{String(month.month).padStart(2,"0")}</div>
@@ -1921,6 +2257,7 @@ export default function App(){
                                   <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"9px",marginTop:"3px"}}>
                                     {/* Interactive Topic Checkbox */}
                                     <div onClick={(e)=>{e.stopPropagation(); toggleTopicDone(month.month, ti, topic);}}
+                                      data-saber-color={ph.c}
                                       style={{
                                         width:"14px",
                                         height:"14px",
@@ -1956,7 +2293,7 @@ export default function App(){
                                     const k=`m${month.month}_t${ti}_i${ii}`;
                                     const isDone=done[k];
                                     return(
-                                      <div key={ii} className="rm-check" style={{display:"flex",gap:"7px",alignItems:"flex-start",marginBottom:"6px"}} onClick={()=>toggleDone(k,month.month)}>
+                                      <div key={ii} className="rm-check" data-saber-color={ph.c} style={{display:"flex",gap:"7px",alignItems:"flex-start",marginBottom:"6px"}} onClick={()=>toggleDone(k,month.month)}>
                                         <div style={{width:"13px",height:"13px",borderRadius:"3px",flexShrink:0,marginTop:"3px",border:`1.5px solid ${isDone?ph.c:"rgba(255,255,255,0.12)"}`,background:isDone?`${ph.c}20`:"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .18s ease"}}>
                                           {isDone&&<span style={{fontSize:"8px",color:ph.c,animation:"popIn .2s ease both"}}>✓</span>}
                                         </div>
@@ -1989,6 +2326,7 @@ export default function App(){
                     </div>
                   );
                 })}
+                </div>
               </div>
             ))}
           </div>
