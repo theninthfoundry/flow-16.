@@ -3,6 +3,28 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianG
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@1,800;1,900&display=swap');
+:root {
+  --nebula-purple: rgba(139, 92, 246, 0.16);
+  --nebula-teal: rgba(20, 184, 166, 0.14);
+  --nebula-gold: rgba(245, 158, 11, 0.11);
+  --nebula-magenta: rgba(236, 72, 153, 0.10);
+}
+@keyframes spaceThrum {
+  0%, 100% {
+    transform: scale(1.0);
+    opacity: 0.90;
+    filter: brightness(0.95);
+  }
+  50% {
+    transform: scale(1.025);
+    opacity: 1.0;
+    filter: brightness(1.1);
+  }
+}
+.deep-space-thrum {
+  animation: spaceThrum 16s ease-in-out infinite;
+  transform-origin: center center;
+}
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:#020611;font-family:'Inter',sans-serif;color:#F8FAFC}
 ::-webkit-scrollbar{width:4px;height:4px}
@@ -234,6 +256,14 @@ select{appearance:none;cursor:pointer}
   border-radius: 50%;
   box-shadow: 0 0 12px rgba(167, 139, 250, 0.8), 0 0 4px #ffffff;
   animation: dynamicShootingStar 2.2s cubic-bezier(0.1, 0.8, 0.25, 1) both;
+}
+@keyframes modalPopIn {
+  0% { transform: scale(0.92) translateY(12px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes backdropFadeIn {
+  0% { opacity: 0; backdrop-filter: blur(0px); -webkit-backdrop-filter: blur(0px); background: rgba(2, 6, 17, 0); }
+  100% { opacity: 1; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); background: rgba(2, 6, 17, 0.7); }
 }
 `;
 
@@ -851,8 +881,43 @@ function TieFighterSVG({ width = 85, height = 90, className = "", style = {} }) 
   );
 }
 
+const SYSTEMS = [
+  [
+    { r: 139, g: 92, b: 246, a: 0.14 }, // Deep Purple
+    { r: 20, g: 184, b: 166, a: 0.12 }, // Vibrant Teal
+    { r: 245, g: 158, b: 11, a: 0.08 }  // Soft Gold
+  ],
+  [
+    { r: 20, g: 184, b: 166, a: 0.14 }, // Vibrant Teal
+    { r: 245, g: 158, b: 11, a: 0.12 }, // Soft Gold
+    { r: 139, g: 92, b: 246, a: 0.08 }  // Deep Purple
+  ],
+  [
+    { r: 245, g: 158, b: 11, a: 0.14 }, // Soft Gold
+    { r: 139, g: 92, b: 246, a: 0.12 }, // Deep Purple
+    { r: 20, g: 184, b: 166, a: 0.08 }  // Vibrant Teal
+  ]
+];
+
+const lerp = (v0, v1, t) => v0 + (v1 - v0) * t;
+
+const getSystemColorString = (nebIdx, pct, alphaMultiplier = 1.0) => {
+  const sysA = pct <= 0.5 ? SYSTEMS[0][nebIdx] : SYSTEMS[1][nebIdx];
+  const sysB = pct <= 0.5 ? SYSTEMS[1][nebIdx] : SYSTEMS[2][nebIdx];
+  const t = pct <= 0.5 ? pct * 2 : (pct - 0.5) * 2;
+  const r = Math.round(lerp(sysA.r, sysB.r, t));
+  const g = Math.round(lerp(sysA.g, sysB.g, t));
+  const b = Math.round(lerp(sysA.b, sysB.b, t));
+  const a = lerp(sysA.a, sysB.a, t) * alphaMultiplier;
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+};
+
 function UniverseBackground() {
   const canvasRef = useRef(null);
+  
+  const [fps, setFps] = useState(60);
+  const frameCountRef = useRef(0);
+  const lastFpsUpdateRef = useRef(performance.now());
   
   // Track viewport scrolling and velocity
   const scrollYRef = useRef(0);
@@ -865,7 +930,6 @@ function UniverseBackground() {
   // Background state vectors
   const starsRef = useRef([]);
   const nebulaeRef = useRef([]);
-  const shootingStarsRef = useRef([]);
 
   useEffect(() => {
     // Generate beautiful multi-layered starry space
@@ -873,7 +937,7 @@ function UniverseBackground() {
     const tempStars = [];
     
     // Distant background stars (Layer 1) - small, dim, slowest scroll
-    for (let i = 0; i < 110; i++) {
+    for (let i = 0; i < 45; i++) {
       tempStars.push({
         x: Math.random(),
         y: Math.random(),
@@ -887,7 +951,7 @@ function UniverseBackground() {
     }
 
     // Mid-distance colorful stars (Layer 2) - medium size, colorful, medium scroll
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 20; i++) {
       tempStars.push({
         x: Math.random(),
         y: Math.random(),
@@ -901,7 +965,7 @@ function UniverseBackground() {
     }
 
     // High-intensity foreground stars (Layer 3) - large, highly glowing, fast scroll
-    for (let i = 0; i < 22; i++) {
+    for (let i = 0; i < 6; i++) {
       tempStars.push({
         x: Math.random(),
         y: Math.random(),
@@ -949,6 +1013,23 @@ function UniverseBackground() {
         driftSpeedY: -0.00008,
       }
     ];
+
+    // Pre-allocate shooting stars Object Pool to avoid dynamic allocations & garbage collection
+    const MAX_SHOOTING_STARS = 6;
+    const shootingStarPool = [];
+    for (let i = 0; i < MAX_SHOOTING_STARS; i++) {
+      shootingStarPool.push({
+        active: false,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        length: 0,
+        color: "",
+        life: 0,
+        decay: 0
+      });
+    }
 
     const handleScroll = () => {
       const currentY = window.scrollY;
@@ -1012,9 +1093,18 @@ function UniverseBackground() {
 
       const smoothedV = smoothedVelocityRef.current;
 
-      // 1. Draw slowly drifting glowing Nebulae
+      // 1. Draw slowly drifting glowing Nebulae using pre-allocated structures
       ctx.globalCompositeOperation = "screen";
-      nebulaeRef.current.forEach((neb, idx) => {
+
+      const scrollHeight = document.documentElement.scrollHeight || 3000;
+      const clientHeight = window.innerHeight;
+      const maxScroll = Math.max(1, scrollHeight - clientHeight);
+      const scrollPct = Math.min(1, Math.max(0, scrollYRef.current / maxScroll));
+
+      const nebulae = nebulaeRef.current;
+      const numNebulae = nebulae.length;
+      for (let idx = 0; idx < numNebulae; idx++) {
+        const neb = nebulae[idx];
         const pulse = 1 + 0.14 * Math.sin(time * neb.pulseSpeed + neb.pulsePhase);
         const radius = Math.max(width, height) * neb.baseRadius * pulse;
         
@@ -1025,41 +1115,55 @@ function UniverseBackground() {
         const parallaxFactor = 0.03 + idx * 0.025;
         const cy = neb.baseY * height + driftY - scrollYRef.current * parallaxFactor;
 
+        const nebColor = getSystemColorString(idx, scrollPct, 1.0);
+        const fadeColor = getSystemColorString(idx, scrollPct, 0.35);
+
         const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-        grad.addColorStop(0, neb.color);
-        grad.addColorStop(0.5, neb.color.replace(/[\d\.]+\)$/, "0.03)"));
+        grad.addColorStop(0, nebColor);
+        grad.addColorStop(0.5, fadeColor);
         grad.addColorStop(1, "transparent");
 
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, width, height);
-      });
+      }
       ctx.globalCompositeOperation = "source-over";
 
-      // 2. Spawn and update high-quality Canvas-based Shooting Stars (Absolute paths, zero lines glitch)
-      if (Math.random() < 0.003 && shootingStarsRef.current.length < 4) {
-        const isCyan = Math.random() > 0.45;
-        shootingStarsRef.current.push({
-          x: Math.random() * width * 0.85 + width * 0.05,
-          y: Math.random() * height * 0.28,
-          vx: -5.0 - Math.random() * 4.0,
-          vy: 4.0 + Math.random() * 4.0,
-          length: 120 + Math.random() * 100,
-          color: isCyan ? "56, 189, 248" : "244, 114, 182", // Cyan or pink
-          life: 1.0,
-          decay: 0.012 + Math.random() * 0.012
-        });
+      // 2. Spawn and update high-quality Canvas-based Shooting Stars from the pre-allocated Object Pool
+      if (Math.random() < 0.003) {
+        // Find an inactive star from the pool
+        for (let i = 0; i < MAX_SHOOTING_STARS; i++) {
+          const ss = shootingStarPool[i];
+          if (!ss.active) {
+            const isCyan = Math.random() > 0.45;
+            ss.active = true;
+            ss.x = Math.random() * width * 0.85 + width * 0.05;
+            ss.y = Math.random() * height * 0.28;
+            ss.vx = -5.0 - Math.random() * 4.0;
+            ss.vy = 4.0 + Math.random() * 4.0;
+            ss.length = 120 + Math.random() * 100;
+            ss.color = isCyan ? "56, 189, 248" : "244, 114, 182"; // Cyan or pink
+            ss.life = 1.0;
+            ss.decay = 0.012 + Math.random() * 0.012;
+            break;
+          }
+        }
       }
 
-      // Update & render shooting stars
-      shootingStarsRef.current = shootingStarsRef.current.filter(ss => {
+      // Update & render active shooting stars in a zero-allocation loop
+      for (let i = 0; i < MAX_SHOOTING_STARS; i++) {
+        const ss = shootingStarPool[i];
+        if (!ss.active) continue;
+
         ss.x += ss.vx;
         ss.y += ss.vy;
         ss.life -= ss.decay;
 
-        if (ss.life <= 0) return false;
+        if (ss.life <= 0) {
+          ss.active = false;
+          continue;
+        }
 
-        // Draw shooting star as a single clean high-speed dot with radial gradient blur,
-        // eliminating any trailing line artifacts/residue
+        // Draw shooting star as a single clean high-speed dot with radial gradient blur
         const radius = 6 + ss.life * 12;
         const grad = ctx.createRadialGradient(ss.x, ss.y, 0, ss.x, ss.y, radius);
         grad.addColorStop(0, `rgba(255, 255, 255, ${ss.life})`);
@@ -1071,12 +1175,13 @@ function UniverseBackground() {
         ctx.beginPath();
         ctx.arc(ss.x, ss.y, radius, 0, Math.PI * 2);
         ctx.fill();
+      }
 
-        return true;
-      });
-
-      // 3. Draw Stars Layer with Parallax & Scroll-Triggered Hyperspace streak stretch
-      starsRef.current.forEach(star => {
+      // 3. Draw Stars Layer with Parallax & Scroll-Triggered Hyperspace streak stretch using fast indices
+      const stars = starsRef.current;
+      const numStars = stars.length;
+      for (let i = 0; i < numStars; i++) {
+        const star = stars[i];
         const rawY = star.y * height - scrollYRef.current * star.parallaxFactor;
         const starX = star.x * width;
         const starY = (rawY % height + height) % height; // Seamless wrap
@@ -1127,9 +1232,19 @@ function UniverseBackground() {
           ctx.beginPath();
           ctx.arc(starX, starY, star.size, 0, Math.PI * 2);
           ctx.fill();
-          ctx.globalAlpha = 1.0;
         }
-      });
+      }
+      ctx.globalAlpha = 1.0;
+
+      // Update FPS calculation
+      frameCountRef.current++;
+      const now = performance.now();
+      if (now - lastFpsUpdateRef.current >= 1000) {
+        const calculatedFps = Math.round((frameCountRef.current * 1000) / (now - lastFpsUpdateRef.current));
+        setFps(calculatedFps);
+        frameCountRef.current = 0;
+        lastFpsUpdateRef.current = now;
+      }
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -1145,24 +1260,40 @@ function UniverseBackground() {
   }, []);
 
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
+    <div className="deep-space-thrum" style={{ position: "fixed", inset: 0, zIndex: 0, pointerEvents: "none", overflow: "hidden" }}>
       {/* High-Resolution Animated space background canvas */}
       <canvas ref={canvasRef} style={{ display: "block", width: "100%", height: "100%" }} />
 
-      {/* Death Star: Orbiting center with self-rotation and green/blue Kyber glow */}
+      {/* FPS Monitoring Component */}
       <div style={{
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        width: "200px",
-        height: "200px",
-        marginTop: "-100px",
-        marginLeft: "-100px",
-        animation: "deathStarOrbit 210s linear infinite, deathStarGlow 14s ease-in-out infinite",
-        zIndex: 1,
-        pointerEvents: "none"
+        position: "fixed",
+        bottom: "16px",
+        right: "16px",
+        background: "rgba(10, 22, 40, 0.8)",
+        border: "1px solid rgba(20, 184, 166, 0.3)",
+        borderRadius: "30px",
+        padding: "5px 12px",
+        fontSize: "11px",
+        color: fps >= 55 ? "#10F5A0" : fps >= 30 ? "#FBBF24" : "#EF4444",
+        fontWeight: "700",
+        boxShadow: fps >= 55 ? "0 0 10px rgba(16, 245, 160, 0.2)" : "none",
+        zIndex: 9999,
+        pointerEvents: "auto",
+        fontFamily: "'JetBrains Mono', monospace",
+        display: "flex",
+        alignItems: "center",
+        gap: "6px",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)"
       }}>
-        <DeathStarSVG size={180} style={{ animation: "slowRotate 260s linear infinite" }} />
+        <span style={{
+          width: "6px",
+          height: "6px",
+          borderRadius: "50%",
+          background: fps >= 55 ? "#10F5A0" : fps >= 30 ? "#FBBF24" : "#EF4444",
+          boxShadow: fps >= 55 ? "0 0 6px #10F5A0" : "none"
+        }} />
+        <span>PERF: {fps} FPS</span>
       </div>
 
       {/* Imperial Star Destroyer (Looming background sentinel) */}
@@ -1176,18 +1307,6 @@ function UniverseBackground() {
         filter: "drop-shadow(0 0 15px rgba(255,255,255,0.05))"
       }}>
         <StarDestroyerSVG width="220" height="130" />
-      </div>
-
-      {/* Millennium Falcon (Gentle exploration top-right) */}
-      <div style={{
-        position: "absolute",
-        top: "6%",
-        right: "5%",
-        opacity: 0.65,
-        animation: "floatShip2 28s ease-in-out infinite",
-        filter: "drop-shadow(0 0 16px rgba(56, 189, 248, 0.25))"
-      }}>
-        <MillenniumFalconSVG width="115" height="100" />
       </div>
 
       {/* Star Wars Space Chase: TIE Fighter (being chased!) */}
@@ -1706,6 +1825,381 @@ function ModuleNoteDrawer({ activeMonth, onClose, onSave }) {
   );
 }
 
+function ModuleFocusedReader({
+  activeMonth,
+  onClose,
+  done,
+  toggleDone,
+  toggleTopicDone,
+  markAll,
+  resetMonth,
+  bkm,
+  toggleBkm,
+  searchQuery,
+  selectedDiff,
+  selectedDomain,
+  setActiveNoteMonth,
+  resOpen,
+  setResOpen,
+  csOpen,
+  setCsOpen
+}) {
+  if (!activeMonth) return null;
+  const monthData = MONTHS.find(m => m.month === activeMonth);
+  if (!monthData) return null;
+  
+  const ph = PHASES[monthData.phase - 1];
+  const p = pct(monthData, done);
+  const comp = doneItems(monthData, done);
+  const tot = totalItems(monthData);
+  const isBkm = bkm[monthData.month];
+
+  return (
+    <div style={{
+      position: "fixed",
+      inset: 0,
+      zIndex: 1500,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "20px",
+      animation: "backdropFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both"
+    }} onClick={onClose}>
+      <div style={{
+        width: "100%",
+        maxWidth: "920px",
+        maxHeight: "90vh",
+        background: "rgba(10, 22, 40, 0.95)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        border: `1px solid ${ph.c}40`,
+        borderRadius: "16px",
+        boxShadow: `0 24px 60px rgba(0,0,0,0.8), 0 0 35px ${ph.glow}, inset 0 1px 0 rgba(255,255,255,0.08)`,
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        animation: "modalPopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both",
+        position: "relative"
+      }} onClick={e => e.stopPropagation()}>
+        {/* Top phase colored progress gradient line */}
+        <div style={{
+          height: "4px",
+          background: `linear-gradient(90deg, ${ph.c}, ${ph.c2})`,
+          boxShadow: `0 2px 14px ${ph.c}`
+        }} />
+
+        {/* Header section with title and actions */}
+        <div style={{
+          padding: "24px 30px 18px",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center"
+        }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ fontSize: "10px", color: ph.c, fontWeight: "800", letterSpacing: "2.5px", textTransform: "uppercase" }}>
+                {ph.name} · MODULE {activeMonth}
+              </span>
+              <span style={{
+                fontSize: "8px",
+                background: `${ph.c}14`,
+                border: `1.5px solid ${ph.c}30`,
+                borderRadius: "12px",
+                padding: "2px 8px",
+                color: ph.c2,
+                fontWeight: "700"
+              }}>
+                {ph.full}
+              </span>
+            </div>
+            <div style={{ fontSize: "24px", fontWeight: "900", color: T1, fontFamily: "'Playfair Display', serif", fontStyle: "italic", marginTop: "6px" }}>
+              {highlightText(monthData.title, searchQuery, ph.c)}
+            </div>
+            <div style={{ fontSize: "11px", color: T3, marginTop: "4px" }}>
+              {highlightText(monthData.tag, searchQuery, ph.c)}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            {/* Ring and Progress percentage */}
+            <div style={{ position: "relative" }}>
+              <BigRing p={p} color={ph.c} size={54} />
+            </div>
+
+            {/* Bookmark button */}
+            <button className="rm-btn" onClick={() => toggleBkm(monthData.month)} style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              border: `1.5px solid ${isBkm ? "#FBBF24" : "rgba(255,255,255,0.08)"}`,
+              background: isBkm ? "rgba(251,191,36,0.08)" : "rgba(255,255,255,0.02)",
+              color: isBkm ? "#FBBF24" : T3,
+              fontSize: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "all 0.22s"
+            }}>
+              {isBkm ? "★" : "☆"}
+            </button>
+
+            {/* Close button */}
+            <button onClick={onClose} className="rm-btn" style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              border: "1px solid rgba(255,255,255,0.08)",
+              background: "rgba(255,255,255,0.02)",
+              color: T2,
+              fontSize: "14px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              transition: "all 0.22s"
+            }}>
+              ✕
+            </button>
+          </div>
+        </div>
+
+        {/* Scrollable details body */}
+        <div style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "24px 30px 30px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "20px"
+        }} className="no-scrollbar">
+
+          {/* Goal section */}
+          <div style={{
+            background: `${ph.c}05`,
+            border: `1.5px dashed ${ph.c}30`,
+            borderRadius: "12px",
+            padding: "16px 20px",
+            display: "flex",
+            gap: "14px",
+            alignItems: "flex-start"
+          }}>
+            <span style={{ fontSize: "20px", flexShrink: 0, marginTop: "2px" }}>🎯</span>
+            <div>
+              <div style={{ fontSize: "9px", letterSpacing: "1.5px", color: ph.c, fontWeight: "800", marginBottom: "4px", textTransform: "uppercase" }}>Monthly Objective</div>
+              <div style={{ fontSize: "13px", color: T1, lineHeight: 1.7, fontWeight: "500" }}>{highlightText(monthData.goal, searchQuery, ph.c)}</div>
+            </div>
+          </div>
+
+          {/* Actions toolbar */}
+          <div style={{
+            display: "flex",
+            gap: "10px",
+            padding: "12px 18px",
+            background: "rgba(255,255,255,0.02)",
+            border: "1px solid rgba(255,255,255,0.04)",
+            borderRadius: "10px",
+            alignItems: "center",
+            flexWrap: "wrap"
+          }}>
+            <div style={{ fontSize: "11px", color: T2, fontWeight: "600" }}>
+              Completed <span style={{ color: ph.c, fontWeight: "800", fontSize: "12px" }}>{comp}</span> of <span style={{ color: T1, fontWeight: "800", fontSize: "12px" }}>{tot}</span> steps
+            </div>
+            <div style={{ flex: 1 }} />
+            <button className="rm-btn" onClick={() => setActiveNoteMonth(monthData.month)} style={{ padding: "6px 14px", borderRadius: "6px", border: `1px solid ${BDR2}`, background: "rgba(255,255,255,0.03)", color: T1, fontSize: "11px", fontWeight: "700", display: "flex", alignItems: "center", gap: "6px" }}>
+              📝 Personal Note
+            </button>
+            <button className="rm-btn" onClick={() => setResOpen(p => ({ ...p, [monthData.month]: !p[monthData.month] }))} style={{ padding: "6px 14px", borderRadius: "6px", border: `1.5px solid ${ph.c}30`, background: `${ph.c}0C`, color: ph.c, fontSize: "11px", fontWeight: "700" }}>
+              📚 {resOpen[monthData.month] ? "Hide Resources" : "Show Resources"}
+            </button>
+            <button className="rm-btn" onClick={() => markAll(monthData.month)} style={{ padding: "6px 14px", borderRadius: "6px", border: `1.5px solid ${ph.c}38`, background: `${ph.c}14`, color: ph.c, fontSize: "11px", fontWeight: "800" }}>
+              ✓ Mark Month Complete
+            </button>
+            <button className="rm-btn" onClick={() => resetMonth(monthData.month)} style={{ padding: "6px 10px", borderRadius: "6px", border: `1px solid ${BDR}`, background: "transparent", color: T3, fontSize: "11px", fontWeight: "600" }}>
+              ↺ Reset
+            </button>
+          </div>
+
+          {/* Persistent Hand-written Note Preview if exists */}
+          {(() => {
+            const note = ls.get(`rmx_module_notes_${monthData.month}`, "");
+            if (!note) return null;
+            return (
+              <div onClick={() => setActiveNoteMonth(monthData.month)} style={{
+                background: "rgba(255,255,255,0.01)",
+                border: `1.5px dashed ${ph.c}40`,
+                borderRadius: "12px",
+                padding: "14px 18px",
+                fontSize: "13px",
+                color: T2,
+                lineHeight: "1.65",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "12px",
+                transition: "all 0.25s ease",
+                boxShadow: `inset 0 0 12px ${ph.c}05`
+              }} className="hover:border-indigo-400 group">
+                <span style={{ fontSize: "18px", marginTop: "-1px" }}>✍️</span>
+                <div style={{ flex: 1 }}>
+                  <span style={{ fontWeight: "800", color: ph.c, fontSize: "9px", textTransform: "uppercase", letterSpacing: "1.5px", display: "block", marginBottom: "4px" }}>MODULE MEMO</span>
+                  <span className="italic" style={{ color: T1 }}>"{note}"</span>
+                </div>
+                <span style={{ fontSize: "11px", color: T3, alignSelf: "center", fontWeight: "600" }}>Edit Memo ✎</span>
+              </div>
+            );
+          })()}
+
+          {/* Resources panel within the Modal */}
+          {resOpen[monthData.month] && <Resources monthNum={monthData.month} color={ph.c} />}
+
+          {/* Topics & Checklists Grid inside Modal */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {monthData.topics.map((topic, ti) => {
+              const matchesDiff = selectedDiff === "All" || topic.diff === selectedDiff;
+              const matchesDom = selectedDomain === "All" || getTopicDomain(topic, monthData) === selectedDomain;
+              if (!matchesDiff || !matchesDom) return null;
+
+              const isTopicMatch = !searchQuery.trim() || 
+                topic.name.toLowerCase().includes(searchQuery.toLowerCase().trim()) || 
+                topic.items.some(item => item.toLowerCase().includes(searchQuery.toLowerCase().trim()));
+              if (!isTopicMatch) return null;
+
+              const topDone = topic.items.filter((_, ii) => done[`m${monthData.month}_t${ti}_i${ii}`]).length;
+              const isAllDone = topDone === topic.items.length;
+              const isPartDone = topDone > 0 && topDone < topic.items.length;
+              const dc = DIFF_C[topic.diff] || T3;
+              const csKey = `${monthData.month}_${ti}`;
+              const csIsOpen = csOpen[csKey];
+
+              return (
+                <div key={ti} style={{
+                  background: "rgba(10, 25, 47, 0.35)",
+                  border: `1px solid ${isAllDone ? ph.c + "33" : "rgba(255,255,255,0.04)"}`,
+                  borderRadius: "12px",
+                  padding: "16px 20px",
+                  position: "relative"
+                }}>
+                  {/* Topic progress mini-bar */}
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: "2.5px", background: "rgba(255,255,255,0.02)", borderRadius: "12px 12px 0 0" }}>
+                    <div style={{ height: "100%", width: `${(topDone / topic.items.length) * 100}%`, background: `linear-gradient(90deg, ${ph.c}, ${ph.c2})`, transition: "width .6s ease" }} />
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px", marginTop: "4px" }}>
+                    {/* Interactive Topic Checkbox */}
+                    <div onClick={(e) => { e.stopPropagation(); toggleTopicDone(monthData.month, ti, topic); }}
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        borderRadius: "4px",
+                        flexShrink: 0,
+                        border: `1.5px solid ${isAllDone ? ph.c : (isPartDone ? `${ph.c}95` : "rgba(255,255,255,0.22)")}`,
+                        background: isAllDone ? `${ph.c}20` : (isPartDone ? `${ph.c}0E` : "transparent"),
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        transition: "all .2s ease"
+                      }}
+                      className="rm-check"
+                      title={isAllDone ? "Reset whole topic" : "Mark whole topic as completed"}>
+                      {isAllDone && <span style={{ fontSize: "10px", color: ph.c, fontWeight: "bold" }}>✓</span>}
+                      {isPartDone && <div style={{ width: "6px", height: "1.5px", background: ph.c, borderRadius: "1px" }} />}
+                    </div>
+
+                    <div style={{ flex: 1, fontSize: "12px", fontWeight: "800", color: ph.c2, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+                      {highlightText(topic.name, searchQuery, ph.c)}
+                    </div>
+                    <span style={{ fontSize: "8px", fontWeight: "700", color: dc, padding: "2px 8px", background: `${dc}0E`, borderRadius: "4px", border: `1px solid ${dc}22`, letterSpacing: "0.5px" }}>
+                      {topic.diff}
+                    </span>
+                    <span style={{ fontSize: "10px", color: topDone === topic.items.length ? "#10B981" : T3, fontWeight: "700" }}>
+                      {topDone}/{topic.items.length} completed
+                    </span>
+                    <button className="rm-btn" onClick={() => setCsOpen(p => ({ ...p, [csKey]: !p[csKey] }))}
+                      style={{ padding: "3px 8px", borderRadius: "5px", background: csIsOpen ? `${ph.c}14` : "rgba(255,255,255,0.04)", border: `1px solid ${csIsOpen ? ph.c + "38" : BDR}`, color: csIsOpen ? ph.c : T3, fontSize: "10px", fontWeight: "600" }}>
+                      {csIsOpen ? "▲ Hide notes" : "📋 Cheat sheet"}
+                    </button>
+                  </div>
+
+                  {/* Sub-items checklist with perfect spacing and high visibility */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {topic.items.map((item, ii) => {
+                      const isItemMatch = !searchQuery.trim() || 
+                        item.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
+                        topic.name.toLowerCase().includes(searchQuery.toLowerCase().trim());
+                      if (!isItemMatch) return null;
+                      const k = `m${monthData.month}_t${ti}_i${ii}`;
+                      const isDone = done[k];
+                      return (
+                        <div key={ii} className="rm-check" style={{
+                          display: "flex",
+                          gap: "10px",
+                          alignItems: "flex-start",
+                          padding: "6px 10px",
+                          borderRadius: "6px",
+                          background: isDone ? "rgba(255,255,255,0.01)" : "transparent",
+                          transition: "background 0.2s"
+                        }} onClick={() => toggleDone(k, monthData.month)}>
+                          <div style={{
+                            width: "14px",
+                            height: "14px",
+                            borderRadius: "3.5px",
+                            flexShrink: 0,
+                            marginTop: "3px",
+                            border: `1.5px solid ${isDone ? ph.c : "rgba(255,255,255,0.18)"}`,
+                            background: isDone ? `${ph.c}20` : "transparent",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            transition: "all .18s ease"
+                          }}>
+                            {isDone && <span style={{ fontSize: "9px", color: ph.c, fontWeight: "bold" }}>✓</span>}
+                          </div>
+                          <span style={{
+                            fontSize: "12px",
+                            lineHeight: 1.6,
+                            color: isDone ? "rgba(255,255,255,0.3)" : T2,
+                            textDecoration: isDone ? "line-through" : "none",
+                            transition: "all .18s ease"
+                          }}>
+                            {highlightText(item, searchQuery, ph.c)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {csIsOpen && <CheatSheet storeKey={csKey} color={ph.c} />}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Footer of the Modal: Parallel Study & Milestones side-by-side */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "12px", marginTop: "10px" }}>
+            <div style={{ background: "rgba(10, 25, 47, 0.25)", border: `1px solid ${BDR}`, borderRadius: "10px", padding: "16px 18px" }}>
+              <div style={{ fontSize: "10px", letterSpacing: "1.5px", color: T3, fontWeight: "800", marginBottom: "10px", textTransform: "uppercase" }}>⚡ Parallel This Month</div>
+              <div style={{ fontSize: "12px", color: T2, lineHeight: 1.7 }}>{monthData.parallel}</div>
+            </div>
+            <div style={{ background: "rgba(10, 25, 47, 0.25)", border: `1px solid ${BDR}`, borderRadius: "10px", padding: "16px 18px" }}>
+              <div style={{ fontSize: "10px", letterSpacing: "1.5px", color: T3, fontWeight: "800", marginBottom: "10px", textTransform: "uppercase" }}>🏆 Milestones</div>
+              {monthData.milestones.map((ml, i) => (
+                <div key={i} style={{ display: "flex", gap: "8px", alignItems: "flex-start", marginBottom: "8px" }}>
+                  <span style={{ color: ph.c, fontSize: "10px", marginTop: "3px", flexShrink: 0 }}>✓</span>
+                  <span style={{ fontSize: "12px", color: T2, lineHeight: 1.6 }}>{ml}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App(){
   useEffect(()=>{
     if(document.getElementById("rmx-css"))return;
@@ -1729,6 +2223,7 @@ export default function App(){
   const [selectedDiff, setSelectedDiff] = useState("All");
   const [selectedDomain, setSelectedDomain] = useState("All");
   const [activeNoteMonth, setActiveNoteMonth] = useState(null);
+  const [focusedMonth, setFocusedMonth] = useState(null);
   const [syncState, setSyncState] = useState("saved"); // "saving" | "saved"
 
   const isFirstRender = useRef(true);
@@ -2145,187 +2640,56 @@ export default function App(){
                     });
                     if (!hasMatchingTopics) return null;
 
-                    const isExp = exp === month.month || (searchQuery.trim() !== "" && isMatch) || (selectedDiff !== "All" || selectedDomain !== "All");
-                    const p=pct(month,done);
-                    const ph=PHASES[month.phase-1];
-                    const isBkm=bkm[month.month];
-                    const comp=doneItems(month,done),tot=totalItems(month);
+                    const isSelected = exp === month.month;
+                    const p = pct(month, done);
+                    const ph = PHASES[month.phase - 1];
+                    const isBkm = bkm[month.month];
                     return(
                       <div key={month.month} style={{
-                        gridColumn: isExp ? "1 / -1" : "auto",
                         animation: `fadeUp .28s ease ${idx*.05}s both`,
                         display: "flex",
                         flexDirection: "column"
                       }}>
-                      <div className="rm-card" data-saber-color={ph.c} style={{background:isExp?CARD2:CARD,border:`1px solid ${isExp?ph.c+"45":BDR}`,borderRadius:isExp?"11px 11px 0 0":"11px",padding:"12px 14px",cursor:"pointer",display:"flex",alignItems:"center",gap:"10px",position:"relative",overflow:"hidden",boxShadow:isExp?`0 0 18px ${ph.glow}`:"none",transition:"all .22s ease"}} onClick={()=>setExp(isExp?null:month.month)}>
-                        <div style={{position:"absolute",right:"10px",top:"-10px",fontSize:"72px",fontWeight:"900",color:`${ph.c}04`,lineHeight:1,pointerEvents:"none",userSelect:"none"}}>{String(month.month).padStart(2,"0")}</div>
-                        <div style={{position:"absolute",left:0,top:0,bottom:0,width:"3px",background:`linear-gradient(180deg,${ph.c},${ph.c2})`,borderRadius:"11px 0 0 11px",boxShadow:isExp?`2px 0 8px ${ph.c}50`:"none",transition:"box-shadow .25s"}}/>
-                        <div style={{width:"34px",height:"34px",borderRadius:"8px",background:`${ph.c}14`,border:`1px solid ${ph.c}28`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"12px",fontWeight:"800",color:ph.c,flexShrink:0,marginLeft:"7px",zIndex:1}}>{String(month.month).padStart(2,"0")}</div>
-                        <div style={{flex:1,minWidth:0,zIndex:1}}>
-                           <div style={{fontSize:"12px",fontWeight:"700",color:T1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
-                            {highlightText(month.title, searchQuery, ph.c)}
-                            {isBkm&&<span style={{marginLeft:"5px",fontSize:"11px"}}>⭐</span>}
-                            {p===100&&<span style={{marginLeft:"5px",fontSize:"9px",background:"rgba(16,245,160,0.1)",color:"#10F5A0",padding:"1px 5px",borderRadius:"3px",border:"1px solid rgba(16,245,160,0.22)",fontWeight:"700"}}>✓ DONE</span>}
+                        <div className="rm-card" data-saber-color={ph.c} style={{
+                          background: isSelected ? CARD2 : CARD,
+                          border: `1px solid ${isSelected ? ph.c : BDR}`,
+                          borderRadius: "11px",
+                          padding: "16px 18px",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "12px",
+                          position: "relative",
+                          overflow: "hidden",
+                          boxShadow: isSelected ? `0 0 20px ${ph.glow}` : "none",
+                          transition: "all .22s ease"
+                        }} onClick={()=>setExp(month.month)}>
+                          <div style={{position:"absolute",right:"10px",top:"-12px",fontSize:"72px",fontWeight:"900",color:`${ph.c}04`,lineHeight:1,pointerEvents:"none",userSelect:"none"}}>{String(month.month).padStart(2,"0")}</div>
+                          <div style={{position:"absolute",left:0,top:0,bottom:0,width:"4px",background:`linear-gradient(180deg,${ph.c},${ph.c2})`,borderRadius:"11px 0 0 11px",boxShadow:isSelected?`2px 0 10px ${ph.c}60`:"none",transition:"box-shadow .25s"}}/>
+                          <div style={{width:"36px",height:"36px",borderRadius:"8px",background:`${ph.c}14`,border:`1px solid ${ph.c}28`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"13px",fontWeight:"800",color:ph.c,flexShrink:0,marginLeft:"4px",zIndex:1}}>{String(month.month).padStart(2,"0")}</div>
+                          <div style={{flex:1,minWidth:0,zIndex:1}}>
+                             <div style={{fontSize:"13px",fontWeight:"700",color:T1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>
+                              {highlightText(month.title, searchQuery, ph.c)}
+                              {isBkm&&<span style={{marginLeft:"6px",fontSize:"12px"}}>⭐</span>}
+                              {p===100&&<span style={{marginLeft:"6px",fontSize:"9px",background:"rgba(16,245,160,0.1)",color:"#10F5A0",padding:"1px 6px",borderRadius:"3px",border:"1px solid rgba(16,245,160,0.22)",fontWeight:"700"}}>✓ DONE</span>}
+                            </div>
+                            <div style={{fontSize:"10px",color:T3,marginTop:"3px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{highlightText(month.tag, searchQuery, ph.c)}</div>
+                            <div style={{height:"3px",background:"rgba(255,255,255,0.04)",borderRadius:"1.5px",marginTop:"8px",overflow:"hidden",width:"120px"}}>
+                              <div style={{height:"100%",width:`${p}%`,background:`linear-gradient(90deg,${ph.c},${ph.c2})`,transition:"width .8s ease"}}/>
+                            </div>
                           </div>
-                          <div style={{fontSize:"9px",color:T3,marginTop:"2px",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{highlightText(month.tag, searchQuery, ph.c)}</div>
-                          <div style={{height:"2px",background:"rgba(255,255,255,0.04)",borderRadius:"1px",marginTop:"6px",overflow:"hidden",width:"100px"}}>
-                            <div style={{height:"100%",width:`${p}%`,background:`linear-gradient(90deg,${ph.c},${ph.c2})`,transition:"width .8s ease"}}/>
+                          <div style={{position:"relative",zIndex:1,flexShrink:0}}>
+                            <Ring p={p} color={ph.c} size={44} stroke={4}/>
+                            <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"9px",fontWeight:"800",color:p>0?ph.c:T3}}>{p}%</div>
                           </div>
-                        </div>
-                        <div style={{position:"relative",zIndex:1,flexShrink:0}}>
-                          <Ring p={p} color={ph.c} size={40} stroke={3.5}/>
-                          <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"8px",fontWeight:"700",color:p>0?ph.c:T3}}>{p}%</div>
-                        </div>
-                        <div style={{display:"flex",gap:"2px",zIndex:1}} onClick={e=>e.stopPropagation()}>
-                          <button className="rm-btn" onClick={()=>toggleBkm(month.month)} style={{padding:"3px 5px",borderRadius:"4px",background:"transparent",border:"none",color:isBkm?"#FBBF24":T3,fontSize:"13px"}}>{isBkm?"★":"☆"}</button>
-                          <div style={{color:isExp?ph.c:T3,fontSize:"9px",padding:"4px",transition:"transform .2s",transform:isExp?"rotate(180deg)":"none"}}>▼</div>
+                          <div style={{display:"flex",alignItems:"center",gap:"4px",zIndex:1}} onClick={e=>e.stopPropagation()}>
+                            <button className="rm-btn" onClick={()=>toggleBkm(month.month)} style={{padding:"4px 6px",borderRadius:"4px",background:"transparent",border:"none",color:isBkm?"#FBBF24":T3,fontSize:"14px",cursor:"pointer"}}>{isBkm?"★":"☆"}</button>
+                            <span style={{color:T3,fontSize:"11px",padding:"4px",opacity:0.7}}>↗</span>
+                          </div>
                         </div>
                       </div>
- 
-                      {isExp&&(
-                        <div className="rm-slide" style={{background:"rgba(5,14,30,0.97)",backdropFilter:"blur(20px)",border:`1px solid ${ph.c}28`,borderTop:"none",borderRadius:"0 0 11px 11px",padding:"16px 16px 18px",boxShadow:`0 8px 28px ${ph.glow}`}}>
-                          <div style={{background:`${ph.c}08`,border:`1px solid ${ph.c}20`,borderRadius:"9px",padding:"11px 13px",marginBottom:"14px",display:"flex",gap:"10px",alignItems:"flex-start"}}>
-                            <span style={{fontSize:"15px",flexShrink:0,marginTop:"1px"}}>🎯</span>
-                            <div>
-                              <div style={{fontSize:"9px",letterSpacing:"1.5px",color:ph.c,fontWeight:"700",marginBottom:"3px",textTransform:"uppercase"}}>Monthly Goal</div>
-                              <div style={{fontSize:"12px",color:"#CBD5E1",lineHeight:1.7}}>{highlightText(month.goal, searchQuery, ph.c)}</div>
-                            </div>
-                          </div>
-                          <div style={{display:"flex",gap:"6px",marginBottom:"13px",flexWrap:"wrap",alignItems:"center"}}>
-                            <div style={{fontSize:"10px",color:T3}}><span style={{color:ph.c,fontWeight:"700"}}>{comp}</span>/{tot} done</div>
-                            <div style={{flex:1}}/>
-                            <button className="rm-btn" onClick={()=>setActiveNoteMonth(month.month)} style={{padding:"4px 10px",borderRadius:"5px",border:`1px solid ${BDR2}`,background:"rgba(255,255,255,0.03)",color:T1,fontSize:"9px",fontWeight:"700",display:"flex",alignItems:"center",gap:"4px"}}>📝 Personal Notes</button>
-                            <button className="rm-btn" onClick={()=>setResOpen(p=>({...p,[month.month]:!p[month.month]}))} style={{padding:"3px 9px",borderRadius:"5px",border:`1px solid ${ph.c}30`,background:`${ph.c}0C`,color:ph.c,fontSize:"9px",fontWeight:"600"}}>📚 Resources</button>
-                            <button className="rm-btn" onClick={()=>markAll(month.month)} style={{padding:"3px 9px",borderRadius:"5px",border:`1px solid ${ph.c}38`,background:`${ph.c}12`,color:ph.c,fontSize:"9px",fontWeight:"700"}}>✓ Mark All</button>
-                            <button className="rm-btn" onClick={()=>resetMonth(month.month)} style={{padding:"3px 7px",borderRadius:"5px",border:`1px solid ${BDR}`,background:"transparent",color:T3,fontSize:"9px"}}>↺ Reset</button>
-                          </div>
-
-                          {/* Beautiful hand-written note preview */}
-                          {(() => {
-                            const note = ls.get(`rmx_module_notes_${month.month}`, "");
-                            if (!note) return null;
-                            return (
-                              <div onClick={() => setActiveNoteMonth(month.month)} style={{
-                                background: "rgba(255,255,255,0.01)",
-                                border: `1.5px dashed ${ph.c}40`,
-                                borderRadius: "10px",
-                                padding: "12px 14px",
-                                marginBottom: "14px",
-                                fontSize: "12px",
-                                color: T2,
-                                lineHeight: "1.6",
-                                cursor: "pointer",
-                                position: "relative",
-                                display: "flex",
-                                alignItems: "flex-start",
-                                gap: "10px",
-                                transition: "all 0.25s ease",
-                                boxShadow: `inset 0 0 12px ${ph.c}05`
-                              }} className="hover:border-indigo-400 group">
-                                <span style={{ fontSize: "16px", marginTop: "-1px" }}>✍️</span>
-                                <div style={{ flex: 1 }}>
-                                  <span style={{ fontWeight: "800", color: ph.c, fontSize: "9px", textTransform: "uppercase", letterSpacing: "1px", display: "block", marginBottom: "4px" }}>MODULE MEMO</span>
-                                  <span className="italic" style={{ color: T1 }}>"{note}"</span>
-                                </div>
-                                <span style={{ fontSize: "10px", color: T3, alignSelf: "center" }}>Edit ✎</span>
-                              </div>
-                            );
-                          })()}
-                          {resOpen[month.month]&&<Resources monthNum={month.month} color={ph.c}/>}
-                          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"7px",marginBottom:"9px"}}>
-                            {month.topics.map((topic,ti)=>{
-                              const matchesDiff = selectedDiff === "All" || topic.diff === selectedDiff;
-                              const matchesDom = selectedDomain === "All" || getTopicDomain(topic, month) === selectedDomain;
-                              if (!matchesDiff || !matchesDom) return null;
-
-                              const isTopicMatch = !searchQuery.trim() || 
-                                topic.name.toLowerCase().includes(searchQuery.toLowerCase().trim()) || 
-                                topic.items.some(item => item.toLowerCase().includes(searchQuery.toLowerCase().trim()));
-                              if (!isTopicMatch) return null;
-
-                              const topDone=topic.items.filter((_,ii)=>done[`m${month.month}_t${ti}_i${ii}`]).length;
-                              const isAllDone = topDone === topic.items.length;
-                              const isPartDone = topDone > 0 && topDone < topic.items.length;
-                              const dc=DIFF_C[topic.diff]||T3;
-                              const csKey=`${month.month}_${ti}`;
-                              const csIsOpen=csOpen[csKey];
-                              return(
-                                <div key={ti} style={{background:CARD,border:`1px solid ${isAllDone ? ph.c + "33" : BDR}`,borderRadius:"9px",padding:"12px",position:"relative",overflow:"visible",transition:"border-color 0.2s"}}>
-                                  <div style={{position:"absolute",top:0,left:0,right:0,height:"2px",background:"rgba(255,255,255,0.04)",borderRadius:"9px 9px 0 0"}}>
-                                    <div style={{height:"100%",width:`${(topDone/topic.items.length)*100}%`,background:`linear-gradient(90deg,${ph.c},${ph.c2})`,transition:"width .6s ease"}}/>
-                                  </div>
-                                  <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"9px",marginTop:"3px"}}>
-                                    {/* Interactive Topic Checkbox */}
-                                    <div onClick={(e)=>{e.stopPropagation(); toggleTopicDone(month.month, ti, topic);}}
-                                      data-saber-color={ph.c}
-                                      style={{
-                                        width:"14px",
-                                        height:"14px",
-                                        borderRadius:"4px",
-                                        flexShrink:0,
-                                        border:`1.5px solid ${isAllDone ? ph.c : (isPartDone ? `${ph.c}95` : "rgba(255,255,255,0.22)")}`,
-                                        background:isAllDone ? `${ph.c}20` : (isPartDone ? `${ph.c}0E` : "transparent"),
-                                        display:"flex",
-                                        alignItems:"center",
-                                        justifyContent:"center",
-                                        cursor:"pointer",
-                                        transition:"all .2s ease",
-                                      }}
-                                      className="rm-check"
-                                      title={isAllDone ? "Reset whole topic" : "Mark whole topic as completed"}>
-                                      {isAllDone && <span style={{fontSize:"9px",color:ph.c,fontWeight:"bold",lineHeight:1}}>✓</span>}
-                                      {isPartDone && <div style={{width:"5px",height:"1.5px",background:ph.c,borderRadius:"1px"}}/>}
-                                    </div>
-
-                                    <div style={{flex:1,fontSize:"10px",fontWeight:"700",color:ph.c,textTransform:"uppercase",letterSpacing:"0.4px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{highlightText(topic.name, searchQuery, ph.c)}</div>
-                                    <span style={{fontSize:"7px",fontWeight:"700",color:dc,padding:"1px 5px",background:`${dc}0E`,borderRadius:"3px",border:`1px solid ${dc}22`,letterSpacing:"0.3px",flexShrink:0}}>{topic.diff}</span>
-                                    <span style={{fontSize:"8px",color:topDone===topic.items.length?"#10B981":T3,fontWeight:"600",flexShrink:0}}>{topDone}/{topic.items.length}</span>
-                                    <button className="rm-btn" onClick={()=>setCsOpen(p=>({...p,[csKey]:!p[csKey]}))}
-                                      style={{padding:"2px 6px",borderRadius:"4px",background:csIsOpen?`${ph.c}14`:"rgba(255,255,255,0.04)",border:`1px solid ${csIsOpen?ph.c+"38":BDR}`,color:csIsOpen?ph.c:T3,fontSize:"9px",fontWeight:"600",flexShrink:0}}>
-                                      {csIsOpen?"▲":"📋"}
-                                    </button>
-                                  </div>
-                                  {topic.items.map((item,ii)=>{
-                                    const isItemMatch = !searchQuery.trim() || 
-                                      item.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-                                      topic.name.toLowerCase().includes(searchQuery.toLowerCase().trim());
-                                    if (!isItemMatch) return null;
-                                    const k=`m${month.month}_t${ti}_i${ii}`;
-                                    const isDone=done[k];
-                                    return(
-                                      <div key={ii} className="rm-check" data-saber-color={ph.c} style={{display:"flex",gap:"7px",alignItems:"flex-start",marginBottom:"6px"}} onClick={()=>toggleDone(k,month.month)}>
-                                        <div style={{width:"13px",height:"13px",borderRadius:"3px",flexShrink:0,marginTop:"3px",border:`1.5px solid ${isDone?ph.c:"rgba(255,255,255,0.12)"}`,background:isDone?`${ph.c}20`:"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .18s ease"}}>
-                                          {isDone&&<span style={{fontSize:"8px",color:ph.c,animation:"popIn .2s ease both"}}>✓</span>}
-                                        </div>
-                                        <span style={{fontSize:"10px",lineHeight:1.6,color:isDone?"rgba(255,255,255,0.2)":T2,textDecoration:isDone?"line-through":"none",transition:"all .18s ease"}}>{highlightText(item, searchQuery, ph.c)}</span>
-                                      </div>
-                                    );
-                                  })}
-                                  {csIsOpen&&<CheatSheet storeKey={csKey} color={ph.c}/>}
-                                </div>
-                              );
-                            })}
-                          </div>
-                          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"7px"}}>
-                            <div style={{background:CARD,border:`1px solid ${BDR}`,borderRadius:"8px",padding:"11px 12px"}}>
-                              <div style={{fontSize:"9px",letterSpacing:"1.5px",color:T3,fontWeight:"700",marginBottom:"7px",textTransform:"uppercase"}}>⚡ Parallel This Month</div>
-                              <div style={{fontSize:"11px",color:T2,lineHeight:1.65}}>{month.parallel}</div>
-                            </div>
-                            <div style={{background:CARD,border:`1px solid ${BDR}`,borderRadius:"8px",padding:"11px 12px"}}>
-                              <div style={{fontSize:"9px",letterSpacing:"1.5px",color:T3,fontWeight:"700",marginBottom:"7px",textTransform:"uppercase"}}>🏆 Milestones</div>
-                              {month.milestones.map((ml,i)=>(
-                                <div key={i} style={{display:"flex",gap:"6px",alignItems:"flex-start",marginBottom:"6px"}}>
-                                  <span style={{color:ph.c,fontSize:"9px",marginTop:"3px",flexShrink:0}}>✓</span>
-                                  <span style={{fontSize:"10px",color:T2,lineHeight:1.55}}>{ml}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
                 </div>
               </div>
             ))}
@@ -2580,6 +2944,27 @@ export default function App(){
 
   {/* Persistent Note Drawer */}
   <ModuleNoteDrawer activeMonth={activeNoteMonth} onClose={() => setActiveNoteMonth(null)} onSave={triggerSaveSync} />
+
+  {/* Focused Module Modal Reader */}
+  <ModuleFocusedReader
+    activeMonth={exp}
+    onClose={() => setExp(null)}
+    done={done}
+    toggleDone={toggleDone}
+    toggleTopicDone={toggleTopicDone}
+    markAll={markAll}
+    resetMonth={resetMonth}
+    bkm={bkm}
+    toggleBkm={toggleBkm}
+    searchQuery={searchQuery}
+    selectedDiff={selectedDiff}
+    selectedDomain={selectedDomain}
+    setActiveNoteMonth={setActiveNoteMonth}
+    resOpen={resOpen}
+    setResOpen={setResOpen}
+    csOpen={csOpen}
+    setCsOpen={setCsOpen}
+  />
 
   {/* Celebratory Animation Overlay */}
   <CelebrationOverlay active={confetti !== null} />
