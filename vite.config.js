@@ -6,7 +6,7 @@ import react from '@vitejs/plugin-react'
 //          set base to '/engineering-roadmap/'
 export default defineConfig({
   plugins: [react()],
-  base: '/',
+  base: './',
   server: {
     host: '0.0.0.0',
     port: 3000,
