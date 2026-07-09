@@ -47,17 +47,38 @@ app.post("/api/gemini/chat", async (req, res) => {
     let groundingMetadata;
 
     if (highThinkingEnabled) {
-      // Use gemini-3.1-pro-preview with high thinking for deep systems reasoning
-      response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview",
-        contents,
-        config: {
-          systemInstruction: "You are Flow 16's AI Copilot, a high-intelligence systems and AI architect reasoning engine. Your thinking level is set to HIGH to solve extremely complex questions. Help the user master high-performance systems engineering, low-level optimizations (C/C++, Assembly, Linux kernel, mmap, locks), PostgreSQL query optimizations, database design, Docker, Kubernetes, and Machine Learning math. Keep responses extremely concise, structured, and mathematically precise.",
-          thinkingConfig: {
-            thinkingLevel: ThinkingLevel.HIGH,
+      try {
+        // Use gemini-3.1-pro-preview with high thinking for deep systems reasoning
+        response = await ai.models.generateContent({
+          model: "gemini-3.1-pro-preview",
+          contents,
+          config: {
+            systemInstruction: "You are Flow 16's AI Copilot, a high-intelligence systems and AI architect reasoning engine. Your thinking level is set to HIGH to solve extremely complex questions. Help the user master high-performance systems engineering, low-level optimizations (C/C++, Assembly, Linux kernel, mmap, locks), PostgreSQL query optimizations, database design, Docker, Kubernetes, and Machine Learning math. Keep responses extremely concise, structured, and mathematically precise.",
+            thinkingConfig: {
+              thinkingLevel: ThinkingLevel.HIGH,
+            }
           }
-        }
-      });
+        });
+      } catch (proError: any) {
+        console.warn("Pro reasoning model failed or quota exceeded, falling back to gemini-3.5-flash:", proError.message || proError);
+        
+        // Fallback to gemini-3.5-flash
+        const fallbackResponse = await ai.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents,
+          config: {
+            systemInstruction: "You are Flow 16's AI Copilot, an elite systems and AI architect tutor. Your goal is to explain complex low-level concepts with beautiful clarity and technical precision. Keep responses concise, structured, and mathematically precise. (Note: Since High-Thinking Pro reasoning is currently unavailable, you are operating as a robust fallback)."
+          }
+        });
+
+        // Add a visual indicator to let the user know they are using the fallback mode
+        const fallbackNotice = "\n\n*(System Notice: Pro-reasoning engine quota limit reached or unavailable on this key. Automatically fell back to fast-mode gemini-3.5-flash. You can configure a paid API key in settings to unlock full HIGH thinking capabilities).*";
+        
+        response = {
+          ...fallbackResponse,
+          text: (fallbackResponse.text || "") + fallbackNotice
+        };
+      }
     } else {
       // Use gemini-3.5-flash with Google Search grounding for up-to-date, accurate systems & tech info
       response = await ai.models.generateContent({

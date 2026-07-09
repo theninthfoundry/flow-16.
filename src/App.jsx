@@ -2405,7 +2405,14 @@ export default function App(){
       });
 
       if (!res.ok) {
-        throw new Error("Reasoning Engine returned an error. Verify your connection.");
+        let errMsg = "Reasoning Engine returned an error. Verify your connection.";
+        try {
+          const errData = await res.json();
+          if (errData && errData.error) {
+            errMsg = errData.error;
+          }
+        } catch (_) {}
+        throw new Error(errMsg);
       }
 
       const data = await res.json();
