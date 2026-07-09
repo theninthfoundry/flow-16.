@@ -1,6 +1,57 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
-import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, doc, getDoc, setDoc, serverTimestamp } from "./firebase";
+import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, doc, getDoc, setDoc, serverTimestamp, OperationType, handleFirestoreError } from "./firebase";
+import { motion, AnimatePresence } from "motion/react";
+import { 
+  Sparkles, Settings, LogOut, X, ChevronRight, Sliders, User, Send, Trash2, Volume2, VolumeX, Brain, Zap, RefreshCw, Star
+} from "lucide-react";
+
+const playSuccessBeep = (enabled) => {
+  if (!enabled) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+    osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.1); // G5
+    
+    gain.gain.setValueAtTime(0.04, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start();
+    osc.stop(ctx.currentTime + 0.18);
+  } catch (e) {}
+};
+
+const playSweepSound = (enabled, isUp = true) => {
+  if (!enabled) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.type = "triangle";
+    const startFreq = isUp ? 330 : 660;
+    const endFreq = isUp ? 660 : 330;
+    
+    osc.frequency.setValueAtTime(startFreq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(endFreq, ctx.currentTime + 0.15);
+    
+    gain.gain.setValueAtTime(0.03, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    osc.start();
+    osc.stop(ctx.currentTime + 0.18);
+  } catch (e) {}
+};
 
 
 const CSS = `
@@ -914,7 +965,7 @@ const getSystemColorString = (nebIdx, pct, alphaMultiplier = 1.0) => {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 };
 
-function UniverseBackground() {
+function UniverseBackground({ speed = 1 }) {
   const canvasRef = useRef(null);
   
   const [fps, setFps] = useState(60);
@@ -1107,11 +1158,11 @@ function UniverseBackground() {
       const numNebulae = nebulae.length;
       for (let idx = 0; idx < numNebulae; idx++) {
         const neb = nebulae[idx];
-        const pulse = 1 + 0.14 * Math.sin(time * neb.pulseSpeed + neb.pulsePhase);
+        const pulse = 1 + 0.14 * Math.sin(time * neb.pulseSpeed * speed + neb.pulsePhase);
         const radius = Math.max(width, height) * neb.baseRadius * pulse;
         
-        const driftX = Math.sin(time * neb.driftSpeedX) * width * 0.05;
-        const driftY = Math.cos(time * neb.driftSpeedY) * height * 0.05;
+        const driftX = Math.sin(time * neb.driftSpeedX * speed) * width * 0.05;
+        const driftY = Math.cos(time * neb.driftSpeedY * speed) * height * 0.05;
         const cx = neb.baseX * width + driftX;
         // Multi-layered subtle parallax depth reaction to user scrolling
         const parallaxFactor = 0.03 + idx * 0.025;
@@ -1188,7 +1239,7 @@ function UniverseBackground() {
         const starX = star.x * width;
         const starY = (rawY % height + height) % height; // Seamless wrap
 
-        const twinkle = 0.4 + 0.6 * Math.sin(time * star.twinkleSpeed + star.twinklePhase);
+        const twinkle = 0.4 + 0.6 * Math.sin(time * star.twinkleSpeed * speed + star.twinklePhase);
         const opacity = star.baseOpacity * twinkle;
 
         if (smoothedV > 0.06) {
@@ -2246,6 +2297,143 @@ export default function App(){
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
 
+  // Custom Flow Portal & AI Copilot State
+  const [portalOpen, setPortalOpen] = useState(false);
+  const [starSpeed, setStarSpeed] = useState(() => parseFloat(localStorage.getItem("rmx_star_speed") || "1"));
+  const [audioEnabled, setAudioEnabled] = useState(() => {
+    const saved = localStorage.getItem("rmx_audio_enabled");
+    return saved === null ? true : saved === "true";
+  });
+  const [aiMessages, setAiMessages] = useState(() => {
+    const saved = localStorage.getItem("rmx_ai_messages");
+    return saved ? JSON.parse(saved) : [
+      {
+        role: "model",
+        parts: [{ text: "Greetings, Commander. I am your Flow 16 Systems Copilot. My High-Thinking Reasoning Engine is fully active and synchronized. How can I assist you with low-level systems engineering, database optimization, or mathematical AI foundations today?" }]
+      }
+    ];
+  });
+  const [aiInput, setAiInput] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [highThinkingEnabled, setHighThinkingEnabled] = useState(true);
+
+  // Systems Academy & Interactive Lesson Notes State
+  const [activePortalTab, setActivePortalTab] = useState("chat"); // "chat" | "academy"
+  const [customAcademyTopic, setCustomAcademyTopic] = useState("");
+  const [lessonData, setLessonData] = useState(null);
+  const [lessonLoading, setLessonLoading] = useState(false);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [editableNotes, setEditableNotes] = useState("");
+  const [notesSavedStatus, setNotesSavedStatus] = useState("");
+
+  const handleGenerateLesson = async (selectedPresetTopic) => {
+    const finalTopic = selectedPresetTopic || customAcademyTopic;
+    if (!finalTopic || !finalTopic.trim() || lessonLoading) return;
+
+    setLessonLoading(true);
+    setLessonData(null);
+    setSelectedAnswers({});
+    setQuizSubmitted(false);
+    setNotesSavedStatus("");
+
+    try {
+      const res = await fetch("/api/gemini/lesson", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic: finalTopic })
+      });
+
+      if (!res.ok) throw new Error("Failed to compile interactive lesson.");
+
+      const data = await res.json();
+      setLessonData(data);
+      setEditableNotes(data.structuredNotes || "");
+      playSuccessBeep(audioEnabled);
+    } catch (err) {
+      console.error(err);
+      alert("Error generating lesson: " + (err instanceof Error ? err.message : "Connection failure"));
+    } finally {
+      setLessonLoading(false);
+    }
+  };
+
+  const handleSaveLessonNotes = () => {
+    if (!lessonData) return;
+    setNotesSavedStatus("saving");
+    const noteKey = lessonData.title.toLowerCase().replace(/[^a-z0-9]/g, "_");
+    localStorage.setItem(`rmx_cs_${noteKey}`, editableNotes);
+
+    // Call sync function directly
+    syncToFirestore(user?.uid);
+
+    setTimeout(() => {
+      setNotesSavedStatus("saved");
+      playSuccessBeep(audioEnabled);
+    }, 600);
+  };
+
+  const handleSendAiMessage = async (textToSend) => {
+    const userText = textToSend || aiInput;
+    if (!userText.trim() || aiLoading) return;
+
+    if (!textToSend) setAiInput("");
+
+    const newUserMessage = { role: "user", parts: [{ text: userText }] };
+    const updatedMessages = [...aiMessages, newUserMessage];
+    setAiMessages(updatedMessages);
+    localStorage.setItem("rmx_ai_messages", JSON.stringify(updatedMessages));
+    setAiLoading(true);
+
+    try {
+      const history = aiMessages.map(m => ({
+        role: m.role,
+        parts: m.parts.map(p => ({ text: p.text }))
+      }));
+
+      const res = await fetch("/api/gemini/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: userText,
+          history,
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("Reasoning Engine returned an error. Verify your connection.");
+      }
+
+      const data = await res.json();
+      const modelMessage = { role: "model", parts: [{ text: data.text }] };
+      const nextMessages = [...updatedMessages, modelMessage];
+      setAiMessages(nextMessages);
+      localStorage.setItem("rmx_ai_messages", JSON.stringify(nextMessages));
+      playSuccessBeep(audioEnabled);
+    } catch (err) {
+      console.error(err);
+      const errorMessage = {
+        role: "model",
+        parts: [{ text: `🚨 CONNECTION INTERRUPTED: ${err instanceof Error ? err.message : "The reasoning thrum was disrupted. Please try again."}` }]
+      };
+      setAiMessages([...updatedMessages, errorMessage]);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleClearChat = () => {
+    const defaultMsg = [
+      {
+        role: "model",
+        parts: [{ text: "Greetings, Commander. I am your Flow 16 Systems Copilot. My High-Thinking Reasoning Engine is fully active and synchronized. How can I assist you with low-level systems engineering, database optimization, or mathematical AI foundations today?" }]
+      }
+    ];
+    setAiMessages(defaultMsg);
+    localStorage.removeItem("rmx_ai_messages");
+    playSweepSound(audioEnabled, false);
+  };
+
   const syncToFirestore = useCallback(async (uid) => {
     if (!uid) return;
     try {
@@ -2274,19 +2462,23 @@ export default function App(){
       }
 
       const userProgressRef = doc(db, "user_progress", uid);
-      await setDoc(userProgressRef, {
-        uid,
-        done: doneData,
-        bkm: bkmData,
-        wfocus: wfocusData,
-        eliteDone: eliteDoneData,
-        sundayAnswers: sundayAnswersData,
-        weeklyHabits: weeklyHabitsData,
-        cheatSheets,
-        resources,
-        moduleNotes,
-        lastUpdated: serverTimestamp()
-      }, { merge: true });
+      try {
+        await setDoc(userProgressRef, {
+          uid,
+          done: doneData,
+          bkm: bkmData,
+          wfocus: wfocusData,
+          eliteDone: eliteDoneData,
+          sundayAnswers: sundayAnswersData,
+          weeklyHabits: weeklyHabitsData,
+          cheatSheets,
+          resources,
+          moduleNotes,
+          lastUpdated: serverTimestamp()
+        }, { merge: true });
+      } catch (err) {
+        handleFirestoreError(err, OperationType.WRITE, `user_progress/${uid}`);
+      }
     } catch (err) {
       console.error("Error syncing to Firestore:", err);
     }
@@ -2327,7 +2519,12 @@ export default function App(){
         setSyncState("saving");
         try {
           const progressRef = doc(db, "user_progress", currentUser.uid);
-          const snap = await getDoc(progressRef);
+          let snap;
+          try {
+            snap = await getDoc(progressRef);
+          } catch (err) {
+            handleFirestoreError(err, OperationType.GET, `user_progress/${currentUser.uid}`);
+          }
           if (snap.exists()) {
             const data = snap.data();
             if (data.done) { setDone(data.done); ls.set("rmx_done", data.done); }
@@ -2402,11 +2599,12 @@ export default function App(){
   const toggleDone=useCallback((key,mn)=>{
     setDone(prev=>{
       const next={...prev,[key]:!prev[key]};ls.set("rmx_done",next);
+      if (!prev[key]) playSuccessBeep(audioEnabled);
       const m=MONTHS.find(x=>x.month===mn);
       if(m&&!prev[key]){const nc=Object.keys(next).filter(k=>k.startsWith(`m${mn}_`)&&next[k]).length;if(nc===totalItems(m))setConfetti(mn);}
       return next;
     });
-  },[]);
+  },[audioEnabled]);
   const toggleTopicDone = useCallback((mn, ti, topic) => {
     setDone(prev => {
       const isComp = topic.items.every((_, ii) => prev[`m${mn}_t${ti}_i${ii}`]);
@@ -2419,6 +2617,7 @@ export default function App(){
           next[key] = true;
         }
       });
+      if (!isComp) playSuccessBeep(audioEnabled);
       ls.set("rmx_done", next);
       const m = MONTHS.find(x => x.month === mn);
       if (m && !isComp) {
@@ -2429,7 +2628,7 @@ export default function App(){
       }
       return next;
     });
-  }, []);
+  }, [audioEnabled]);
   const markAll=useCallback(mn=>{
     const m=MONTHS.find(x=>x.month===mn);
     setDone(prev=>{const next={...prev};m.topics.forEach((t,ti)=>t.items.forEach((_,ii)=>{next[`m${mn}_t${ti}_i${ii}`]=true;}));ls.set("rmx_done",next);setConfetti(mn);return next;});
@@ -2480,7 +2679,7 @@ export default function App(){
       <div style={{position:"fixed",top:"45%",right:"15%",width:"35%",height:"35%",background:"radial-gradient(circle, rgba(34,211,238,0.08) 0%, transparent 70%)",borderRadius:"50%",filter:"blur(90px)",pointerEvents:"none",zIndex:0}}/>
 
       {/* Cosmic space & universe visual elements */}
-      <UniverseBackground />
+      <UniverseBackground speed={starSpeed} />
 
       {confetti!=null&&(
         <div style={{position:"fixed",top:0,left:0,right:0,bottom:0,pointerEvents:"none",zIndex:9999,display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -2525,136 +2724,6 @@ export default function App(){
             <div style={{ fontSize: "10px", color: T3, letterSpacing: "1.5px", marginTop: "6px", fontWeight: "700" }}>
               SYSTEMS & AI ARCHITECT ROADMAP
             </div>
-          </div>
-
-          {/* Database Cloud Sync & Auth Card */}
-          <div style={{
-            background: "linear-gradient(135deg, rgba(10, 22, 40, 0.55), rgba(5, 14, 30, 0.45))",
-            border: "1.5px solid rgba(255, 255, 255, 0.08)",
-            borderRadius: "16px",
-            padding: "18px",
-            backdropFilter: "blur(24px)",
-            WebkitBackdropFilter: "blur(24px)",
-            position: "relative"
-          }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
-              <span style={{ fontSize: "10px", fontWeight: "700", color: "#A78BFA", letterSpacing: "1px" }}>
-                ☁️ CLOUD SYNC & AUTH
-              </span>
-              {user && (
-                <span style={{
-                  fontSize: "9px",
-                  fontWeight: "700",
-                  color: syncState === "saving" ? "#FBBF24" : "#10F5A0",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px"
-                }}>
-                  <span style={{
-                    width: "6px",
-                    height: "6px",
-                    borderRadius: "50%",
-                    background: syncState === "saving" ? "#FBBF24" : "#10F5A0",
-                    display: "inline-block",
-                    animation: "pulse 1.5s infinite"
-                  }} />
-                  {syncState === "saving" ? "Syncing…" : "Synced"}
-                </span>
-              )}
-            </div>
-
-            {authLoading ? (
-              <div style={{ padding: "8px 0", textAlign: "center", color: T3, fontSize: "11px" }} className="animate-pulse">
-                Initializing Firebase Auth…
-              </div>
-            ) : !user ? (
-              <div>
-                <p style={{ fontSize: "11px", color: T3, lineHeight: "1.5", marginBottom: "14px" }}>
-                  Connect your Google account to automatically back up your roadmap completion status, custom cheat sheets, notes, bookmarks, and habit progress.
-                </p>
-                <button
-                  onClick={() => signInWithPopup(auth, googleProvider).catch(e => console.error("Sign-in failed:", e))}
-                  className="rm-btn"
-                  style={{
-                    width: "100%",
-                    padding: "9px 12px",
-                    background: "rgba(255, 255, 255, 0.04)",
-                    border: "1px solid rgba(255, 255, 255, 0.12)",
-                    borderRadius: "8px",
-                    color: T1,
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px"
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
-                    e.currentTarget.style.borderColor = "#A78BFA";
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.04)";
-                    e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)";
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
-                    <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.514 5.514 0 0 1 8.5 13c0-3.04 2.46-5.514 5.5-5.514 1.342 0 2.57.486 3.524 1.286l3.057-3.057C18.733 3.943 16.514 3 14 3a10 10 0 0 0-10 10 10 10 0 0 0 10 10c5.52 0 10-4.48 10-10 0-.685-.06-1.354-.171-2H12.24z"/>
-                  </svg>
-                  Sign in with Google
-                </button>
-              </div>
-            ) : (
-              <div>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px", background: "rgba(255,255,255,0.02)", padding: "10px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.04)" }}>
-                  {user.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt={user.displayName}
-                      referrerPolicy="no-referrer"
-                      style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1.5px solid #A78BFA" }}
-                    />
-                  ) : (
-                    <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#A78BFA", color: "#000", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "700" }}>
-                      {user.displayName ? user.displayName[0].toUpperCase() : "U"}
-                    </div>
-                  )}
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: "12px", fontWeight: "700", color: T1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {user.displayName || "Explorer"}
-                    </div>
-                    <div style={{ fontSize: "10px", color: T3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {user.email}
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={() => signOut(auth).catch(e => console.error("Sign-out failed:", e))}
-                  className="rm-btn"
-                  style={{
-                    width: "100%",
-                    padding: "7px 12px",
-                    background: "rgba(239, 68, 68, 0.08)",
-                    border: "1px solid rgba(239, 68, 68, 0.15)",
-                    borderRadius: "8px",
-                    color: "#FCA5A5",
-                    fontSize: "11px",
-                    fontWeight: "600",
-                    transition: "all 0.2s"
-                  }}
-                  onMouseEnter={e => {
-                    e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)";
-                    e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.3)";
-                  }}
-                  onMouseLeave={e => {
-                    e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)";
-                    e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.15)";
-                  }}
-                >
-                  Disconnect Account
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Embedded Pomodoro focus card */}
@@ -3765,6 +3834,627 @@ export default function App(){
     csOpen={csOpen}
     setCsOpen={setCsOpen}
   />
+
+  {/* Celebratory Animation Overlay */}
+  <CelebrationOverlay active={confetti !== null} />
+
+  {/* Elegant Floating Portal Orb & Settings Trigger */}
+  <div style={{
+    position: "fixed",
+    top: "18px",
+    right: "24px",
+    zIndex: 999,
+    display: "flex",
+    alignItems: "center",
+    gap: "10px"
+  }}>
+    <button
+      onClick={() => {
+        setPortalOpen(prev => {
+          const next = !prev;
+          playSweepSound(audioEnabled, next);
+          return next;
+        });
+      }}
+      className="flex items-center gap-2 px-3 py-2 rounded-full border border-white/10 hover:border-[#A78BFA]/40 transition-all duration-300"
+      style={{
+        background: "rgba(10, 22, 40, 0.65)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.6)"
+      }}
+    >
+      <div className="relative flex items-center justify-center">
+        {user ? (
+          user.photoURL ? (
+            <img
+              src={user.photoURL}
+              alt={user.displayName}
+              referrerPolicy="no-referrer"
+              className="w-6 h-6 rounded-full border border-[#10F5A0]"
+            />
+          ) : (
+            <div className="w-6 h-6 rounded-full bg-[#A78BFA] text-black flex items-center justify-center text-xs font-bold font-mono">
+              {user.displayName ? user.displayName[0].toUpperCase() : "U"}
+            </div>
+          )
+        ) : (
+          <div className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center border border-white/20">
+            <User className="w-3.5 h-3.5 text-slate-400" />
+          </div>
+        )}
+        {/* Pulsing neon status indicator dot */}
+        <span className="absolute -bottom-0.5 -right-0.5 flex h-2 w-2">
+          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${user ? "bg-[#10F5A0]" : "bg-cyan-400"}`}></span>
+          <span className={`relative inline-flex rounded-full h-2 w-2 ${user ? "bg-[#10F5A0]" : "bg-cyan-500"}`}></span>
+        </span>
+      </div>
+
+      <span className="text-[10px] font-mono tracking-wider font-semibold text-[#E2E8F0] uppercase">
+        {user ? user.displayName?.split(" ")[0] || "Portal" : "Flow Portal"}
+      </span>
+      
+      <Sparkles className={`w-3.5 h-3.5 transition-all duration-500 ${portalOpen ? "text-pink-500 rotate-180" : "text-[#A78BFA]"}`} />
+    </button>
+  </div>
+
+  {/* Animated Side-drawer Sheet */}
+  <AnimatePresence>
+    {portalOpen && (
+      <>
+        {/* Backdrop glass blur overlay */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => {
+            setPortalOpen(false);
+            playSweepSound(audioEnabled, false);
+          }}
+          className="fixed inset-0 z-[1000] bg-black/75 backdrop-blur-md"
+        />
+
+        {/* Sliding drawer panel container */}
+        <motion.div
+          initial={{ x: "100%" }}
+          animate={{ x: 0 }}
+          exit={{ x: "100%" }}
+          transition={{ type: "spring", damping: 26, stiffness: 190 }}
+          className="fixed top-0 right-0 h-full w-full max-w-md sm:max-w-lg z-[1001] border-l border-white/10 shadow-2xl flex flex-col font-sans select-none text-white overflow-hidden"
+          style={{
+            background: "linear-gradient(180deg, #071324 0%, #030811 100%)",
+            boxShadow: "-12px 0 40px rgba(0,0,0,0.9)"
+          }}
+        >
+          {/* Header */}
+          <div className="p-4 border-b border-white/10 flex items-center justify-between" style={{ background: "rgba(10, 22, 40, 0.4)" }}>
+            <div className="flex items-center gap-2">
+              <Brain className="w-5 h-5 text-[#A78BFA] animate-pulse" />
+              <div>
+                <div className="text-[11px] tracking-widest font-mono text-[#A78BFA] font-bold">SYSTEMS INTEGRITY</div>
+                <div className="text-xs font-mono font-medium text-slate-300">FLOW 16 SECTORS PORTAL</div>
+              </div>
+            </div>
+            
+            <button
+              onClick={() => {
+                setPortalOpen(false);
+                playSweepSound(audioEnabled, false);
+              }}
+              className="p-1.5 rounded-full hover:bg-white/5 border border-transparent hover:border-white/10 text-slate-400 hover:text-white transition-all duration-200"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Drawer Scrollable Body Content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar">
+            
+            {/* 1. Google Cloud Sync & Auth Section */}
+            <div className="rounded-xl border border-white/10 p-4 space-y-3" style={{ background: "rgba(10, 22, 40, 0.3)" }}>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono tracking-widest font-bold text-[#A78BFA]">
+                  ☁️ CLOUD SYNC & AUTHENTICATION
+                </span>
+                {user && (
+                  <span className="text-[9px] font-mono font-bold text-[#10F5A0] flex items-center gap-1.5 bg-[#10F5A0]/10 px-2 py-0.5 rounded-full border border-[#10F5A0]/20 font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10F5A0] animate-pulse" />
+                    CONNECTED
+                  </span>
+                )}
+              </div>
+
+              {authLoading ? (
+                <div className="py-4 text-center text-slate-400 text-xs font-mono animate-pulse">
+                  Verifying server keys & authentication status…
+                </div>
+              ) : !user ? (
+                <div className="space-y-3">
+                  <p className="text-xs text-slate-400 leading-relaxed font-mono">
+                    Connect your secure Google workspace to synchronize and back up roadmap items, notebooks, custom cheat sheets, bookmarks, and habit metrics.
+                  </p>
+                  <button
+                    onClick={() => signInWithPopup(auth, googleProvider).catch(e => console.error("Sign-in failed:", e))}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-white/10 bg-white/5 text-xs font-mono font-semibold text-white hover:bg-white/10 hover:border-[#A78BFA]/30 transition-all duration-200"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                      <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.514 5.514 0 0 1 8.5 13c0-3.04 2.46-5.514 5.5-5.514 1.342 0 2.57.486 3.524 1.286l3.057-3.057C18.733 3.943 16.514 3 14 3a10 10 0 0 0-10 10 10 10 0 0 0 10 10c5.52 0 10-4.48 10-10 0-.685-.06-1.354-.171-2H12.24z"/>
+                    </svg>
+                    CONNECT GOOGLE IDENTITY
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 bg-white/5 p-3 rounded-lg border border-white/5">
+                    {user.photoURL ? (
+                      <img
+                        src={user.photoURL}
+                        alt={user.displayName}
+                        referrerPolicy="no-referrer"
+                        className="w-9 h-9 rounded-full border-2 border-[#A78BFA]"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-[#A78BFA] text-black flex items-center justify-center font-mono font-bold text-sm">
+                        {user.displayName ? user.displayName[0].toUpperCase() : "U"}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1 font-mono">
+                      <div className="text-xs font-bold text-slate-100 truncate">{user.displayName || "Explorer"}</div>
+                      <div className="text-[10px] text-slate-400 truncate">{user.email}</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => signOut(auth).catch(e => console.error("Sign-out failed:", e))}
+                    className="w-full py-1.5 rounded-lg border border-red-500/10 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/20 text-red-400 text-xs font-mono font-medium transition-all duration-200"
+                  >
+                    DISCONNECT IDENTITY
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* 2. Systems Copilot & High-Thinking Oracle Section */}
+            <div className="rounded-xl border border-white/10 p-4 flex flex-col space-y-3" style={{ background: "rgba(10, 22, 40, 0.3)" }}>
+              {/* Tabs Navigation */}
+              <div className="flex border-b border-white/10 pb-1 gap-4">
+                <button
+                  onClick={() => {
+                    setActivePortalTab("chat");
+                    playSweepSound(audioEnabled, true);
+                  }}
+                  className={`pb-1.5 font-mono text-[10px] font-bold tracking-wider transition-all border-b-2 ${activePortalTab === "chat" ? "border-[#A78BFA] text-[#A78BFA]" : "border-transparent text-slate-400 hover:text-slate-200"}`}
+                >
+                  💬 COPILOT CHAT
+                </button>
+                <button
+                  onClick={() => {
+                    setActivePortalTab("academy");
+                    playSweepSound(audioEnabled, true);
+                  }}
+                  className={`pb-1.5 font-mono text-[10px] font-bold tracking-wider transition-all border-b-2 ${activePortalTab === "academy" ? "border-[#A78BFA] text-[#A78BFA]" : "border-transparent text-slate-400 hover:text-slate-200"}`}
+                >
+                  🎓 SYSTEMS ACADEMY
+                </button>
+              </div>
+
+              {activePortalTab === "chat" ? (
+                <div className="space-y-3 flex flex-col">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono tracking-widest font-bold text-[#A78BFA]">
+                      🧠 SYSTEMS AI COPILOT
+                    </span>
+                    
+                    {/* Thinking Mode Toggle Pill Button */}
+                    <button
+                      onClick={() => {
+                        setHighThinkingEnabled(prev => !prev);
+                        playSweepSound(audioEnabled, !highThinkingEnabled);
+                      }}
+                      className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[9px] font-mono font-bold transition-all duration-300 ${highThinkingEnabled ? "bg-[#A78BFA]/15 text-[#A78BFA] border-[#A78BFA]/30 shadow-[0_0_10px_rgba(167,139,250,0.15)]" : "bg-slate-800 text-slate-400 border-transparent"}`}
+                    >
+                      <Brain className={`w-3 h-3 ${highThinkingEnabled ? "animate-pulse" : ""}`} />
+                      THINKING: {highThinkingEnabled ? "HIGH" : "FAST"}
+                    </button>
+                  </div>
+
+                  <div className="text-[10px] font-mono text-slate-400 leading-relaxed">
+                    Mode: <span className="text-[#A78BFA]">{highThinkingEnabled ? "gemini-3.1-pro-preview" : "gemini-3.5-flash"}</span>. Powered by server-side proxy encryption.
+                  </div>
+
+                  {/* Chat Display Window */}
+                  <div className="h-64 rounded-lg bg-black/40 border border-white/5 p-3 overflow-y-auto space-y-3 flex flex-col no-scrollbar">
+                    {aiMessages.map((msg, i) => (
+                      <div key={i} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
+                        <span className="text-[8px] font-mono text-slate-500 mb-0.5 tracking-widest uppercase">
+                          {msg.role === "user" ? "EXPLORER" : "AI ENGINE"}
+                        </span>
+                        <div
+                          className={`max-w-[85%] rounded-lg p-2.5 text-xs font-mono leading-relaxed whitespace-pre-wrap select-text ${msg.role === "user" ? "bg-[#A78BFA]/10 border border-[#A78BFA]/20 text-white" : "bg-white/5 border border-white/5 text-slate-300"}`}
+                        >
+                          {msg.parts[0].text}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {aiLoading && (
+                      <div className="flex flex-col items-start">
+                        <span className="text-[8px] font-mono text-[#A78BFA] mb-0.5 tracking-widest animate-pulse uppercase">
+                          THINKING PROCESS ACTIVE
+                        </span>
+                        <div className="bg-purple-500/5 border border-[#A78BFA]/10 rounded-lg p-3 text-xs font-mono text-[#A78BFA] flex items-center gap-2.5">
+                          <span className="flex h-2 w-2 relative">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A78BFA] opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#A78BFA]"></span>
+                          </span>
+                          {highThinkingEnabled ? (
+                            <span>Simulating system pathways (high thinking level engaged)…</span>
+                          ) : (
+                            <span>Synthesizing flash response…</span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Quick Prompt Scrollable Row */}
+                  <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+                    {[
+                      { label: "🐳 Docker Namespaces", prompt: "Explain how Docker uses Linux namespaces & cgroups to isolate processes." },
+                      { label: "💾 Database Locks", prompt: "What is the difference between Shared and Exclusive locks in Postgres, and how do deadlocks occur?" },
+                      { label: "⚡ CPU Cache", prompt: "Explain CPU cache lines, cache bouncing, and spatial/temporal locality with code examples." },
+                      { label: "📊 Postgres EXPLAIN", prompt: "How do I read a Postgres EXPLAIN ANALYZE query plan? Explain Seq Scan vs Index Scan." }
+                    ].map((item, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSendAiMessage(item.prompt)}
+                        disabled={aiLoading}
+                        className="flex-shrink-0 px-2.5 py-1 text-[9px] font-mono rounded-md border border-white/5 bg-white/5 hover:bg-white/10 hover:border-[#A78BFA]/20 text-slate-300 hover:text-white transition-all duration-150 disabled:opacity-50"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Message Input Box */}
+                  <form onSubmit={e => { e.preventDefault(); handleSendAiMessage(); }} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={aiInput}
+                      onChange={e => setAiInput(e.target.value)}
+                      disabled={aiLoading}
+                      placeholder={aiLoading ? "Thinking..." : "Ask your systems oracle..."}
+                      className="flex-1 min-w-0 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#A78BFA]/50 transition-all disabled:opacity-50"
+                    />
+                    <button
+                      type="submit"
+                      disabled={aiLoading || !aiInput.trim()}
+                      className="p-2 rounded-lg bg-[#A78BFA] hover:bg-purple-400 disabled:bg-slate-800 disabled:text-slate-600 text-black font-semibold flex items-center justify-center transition-all duration-150"
+                    >
+                      <Send className="w-4 h-4 text-black" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleClearChat}
+                      title="Clear conversation log"
+                      className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white transition-all duration-150"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </form>
+                </div>
+              ) : (
+                <div className="space-y-4 flex flex-col">
+                  {/* Systems Academy Topic Picker or Lesson Viewer */}
+                  {!lessonData && !lessonLoading ? (
+                    <div className="space-y-3">
+                      <p className="text-[11px] font-mono text-slate-400 leading-relaxed bg-white/5 p-2.5 rounded-lg border border-white/5">
+                        Welcome to the <strong>Flow 16 Academy</strong>. Select a high-performance system curriculum or define your own. The oracle will generate deep-dive lessons, interactive checkpoint quizzes, and saveable cheat sheet study notes!
+                      </p>
+
+                      <div className="space-y-1.5">
+                        <span className="text-[9px] font-mono font-bold tracking-wider text-slate-400">CURRICULUM PRESETS:</span>
+                        <div className="grid grid-cols-1 gap-1.5">
+                          {[
+                            { label: "🐳 Docker Isolation & namespaces", topic: "Docker Namespaces and cgroups Process Isolation" },
+                            { label: "💾 Postgres Shared & Exclusive Locks", topic: "PostgreSQL Shared and Exclusive Locks, Row-Level locks, and Deadlocks" },
+                            { label: "⚡ CPU Caches & Spatial Locality", topic: "CPU Cache Lines, Spatial & Temporal Locality, Cache Bouncing" },
+                            { label: "📊 Analyzing Postgres EXPLAIN Plans", topic: "Analyzing Postgres Query Plans with EXPLAIN ANALYZE" },
+                            { label: "🧱 Virtual Memory & OS mmap allocation", topic: "Operating System Page Tables, Virtual Memory, and mmap memory allocation" }
+                          ].map((item, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => handleGenerateLesson(item.topic)}
+                              className="w-full text-left p-2.5 rounded-lg border border-white/5 bg-white/5 hover:bg-[#A78BFA]/10 hover:border-[#A78BFA]/30 transition-all text-xs font-mono text-slate-300 hover:text-white"
+                            >
+                              {item.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5 pt-2 border-t border-white/10">
+                        <span className="text-[9px] font-mono font-bold tracking-wider text-slate-400">DEFINE CUSTOM CLASSROOM SYLLABUS:</span>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={customAcademyTopic}
+                            onChange={e => setCustomAcademyTopic(e.target.value)}
+                            placeholder="e.g. TCP Slow Start, Rust lifecycles..."
+                            className="flex-1 min-w-0 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#A78BFA]/50 transition-all"
+                          />
+                          <button
+                            onClick={() => handleGenerateLesson()}
+                            disabled={!customAcademyTopic.trim()}
+                            className="px-3.5 py-2 rounded-lg bg-[#A78BFA] hover:bg-purple-400 disabled:bg-slate-800 disabled:text-slate-600 text-black font-semibold font-mono text-xs transition-all"
+                          >
+                            STUDY
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : lessonLoading ? (
+                    <div className="py-12 flex flex-col items-center justify-center space-y-3 font-mono">
+                      <RefreshCw className="w-8 h-8 text-[#A78BFA] animate-spin" />
+                      <div className="text-center text-xs text-[#A78BFA] animate-pulse">
+                        COMPILING INTERACTIVE LESSON...
+                      </div>
+                      <div className="text-[9px] text-slate-500 text-center max-w-xs leading-relaxed">
+                        The reasoning thrum is generating system-level documentation, formulation summaries, checkout checkpoint quizzes, and pristine exportable notes.
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-5 max-h-[500px] overflow-y-auto pr-1 no-scrollbar select-text">
+                      <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                        <h4 className="text-xs font-bold font-mono text-[#A78BFA] uppercase truncate flex-1 pr-2">
+                          🎓 {lessonData.title}
+                        </h4>
+                        <button
+                          onClick={() => setLessonData(null)}
+                          className="px-2 py-0.5 rounded border border-white/10 hover:border-white/30 text-slate-400 hover:text-white font-mono text-[9px] transition-all"
+                        >
+                          RESET
+                        </button>
+                      </div>
+
+                      {/* Lesson Content Reading */}
+                      <div className="rounded-lg bg-black/40 border border-white/5 p-3.5 space-y-2.5">
+                        <div className="text-[10px] font-mono font-bold text-[#A78BFA]/80 tracking-widest uppercase">
+                          📖 SECTION 1: LECTURE GUIDE
+                        </div>
+                        <div className="text-[11px] font-sans text-slate-300 leading-relaxed">
+                          <Md text={lessonData.lessonContent} color="#A78BFA" />
+                        </div>
+                      </div>
+
+                      {/* Interactive Quiz Checkpoint */}
+                      <div className="rounded-lg bg-black/40 border border-white/5 p-3.5 space-y-3.5">
+                        <div className="text-[10px] font-mono font-bold text-[#A78BFA]/80 tracking-widest uppercase">
+                          📝 SECTION 2: CHECKPOINT QUIZ
+                        </div>
+                        {lessonData.quizQuestions && lessonData.quizQuestions.map((q, qIdx) => {
+                          const selectedOpt = selectedAnswers[qIdx];
+                          return (
+                            <div key={qIdx} className="space-y-2 border-t border-white/5 pt-3 first:border-0 first:pt-0">
+                              <div className="text-xs font-mono font-semibold text-slate-200">
+                                Q{qIdx + 1}: {q.question}
+                              </div>
+                              <div className="grid grid-cols-1 gap-1.5">
+                                {q.options.map((opt, optIdx) => {
+                                  let btnStyle = "border-white/10 bg-white/5 hover:bg-white/10 text-slate-300";
+                                  if (quizSubmitted) {
+                                    if (optIdx === q.correctIndex) {
+                                      btnStyle = "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-bold";
+                                    } else if (optIdx === selectedOpt) {
+                                      btnStyle = "border-red-500/50 bg-red-500/10 text-red-400";
+                                    } else {
+                                      btnStyle = "border-white/5 bg-transparent text-slate-500 opacity-60";
+                                    }
+                                  } else if (selectedOpt === optIdx) {
+                                    btnStyle = "border-[#A78BFA] bg-[#A78BFA]/10 text-white font-bold";
+                                  }
+                                  return (
+                                    <button
+                                      key={optIdx}
+                                      disabled={quizSubmitted}
+                                      onClick={() => {
+                                        setSelectedAnswers(prev => ({ ...prev, [qIdx]: optIdx }));
+                                        playSuccessBeep(audioEnabled);
+                                      }}
+                                      className={`w-full text-left p-2 rounded-lg border text-[10px] font-mono transition-all ${btnStyle}`}
+                                    >
+                                      {opt}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                              {quizSubmitted && (
+                                <div className="text-[9px] font-mono text-slate-400 bg-white/5 border border-white/5 p-2 rounded-md leading-relaxed mt-1">
+                                  <span className="font-bold block mb-1 text-slate-300">
+                                    {selectedOpt === q.correctIndex ? "✅ Correct!" : "❌ Incorrect."}
+                                  </span>
+                                  {q.explanation}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                        
+                        {!quizSubmitted ? (
+                          <button
+                            onClick={() => {
+                              setQuizSubmitted(true);
+                              playSuccessBeep(audioEnabled);
+                            }}
+                            disabled={Object.keys(selectedAnswers).length < (lessonData.quizQuestions?.length || 3)}
+                            className="w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-black font-semibold font-mono text-[11px] transition-all"
+                          >
+                            SUBMIT ANSWERS
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setQuizSubmitted(false);
+                              setSelectedAnswers({});
+                            }}
+                            className="w-full py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 font-mono text-[11px] transition-all"
+                          >
+                            RETRY QUIZ
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Editable summary notes summary notes */}
+                      <div className="rounded-lg bg-black/40 border border-white/5 p-3.5 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold text-[#A78BFA]/80 tracking-widest uppercase">
+                            📋 SECTION 3: STUDY NOTES SUMMARY
+                          </span>
+                        </div>
+                        <textarea
+                          value={editableNotes}
+                          onChange={e => setEditableNotes(e.target.value)}
+                          rows={8}
+                          className="w-full bg-black/50 border border-white/10 rounded-lg p-2.5 text-[10px] font-mono text-slate-200 focus:outline-none focus:border-[#A78BFA]/50 resize-y leading-relaxed"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleSaveLessonNotes}
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#A78BFA] hover:bg-purple-400 text-black text-xs font-mono font-bold transition-all shadow-md"
+                          >
+                            💾 {notesSavedStatus === "saved" ? "SAVED!" : notesSavedStatus === "saving" ? "SAVING..." : "SAVE TO CHEAT SHEETS"}
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(editableNotes);
+                              alert("Lesson summary notes copied to clipboard!");
+                              playSuccessBeep(audioEnabled);
+                            }}
+                            className="px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 font-mono text-[10px] transition-all"
+                          >
+                            COPY NOTES
+                          </button>
+                        </div>
+                        <p className="text-[8px] font-mono text-slate-500 leading-relaxed">
+                          * Saving registers this lesson in your local cheat sheets under the course months, so they automatically load in your main dashboard!
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          setLessonData(null);
+                          playSuccessBeep(audioEnabled);
+                        }}
+                        className="w-full py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white font-mono text-[11px] transition-all"
+                      >
+                        ⬅️ BACK TO ACADEMY TOPICS
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* 3. Settings Control Center (Other Features) */}
+            <div className="rounded-xl border border-white/10 p-4 space-y-4" style={{ background: "rgba(10, 22, 40, 0.3)" }}>
+              <span className="text-[10px] font-mono tracking-widest font-bold text-[#A78BFA] block">
+                ⚙️ VESSEL SYSTEMS & MODE CONTROLS
+              </span>
+
+              {/* Ambient Star Speed Slider */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between font-mono text-[10px]">
+                  <span className="text-slate-300 flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5 text-yellow-400 animate-spin" style={{ animationDuration: "6s" }} />
+                    AMBIENT UNIVERSE SPEED
+                  </span>
+                  <span className="text-[#A78BFA] font-bold">{starSpeed.toFixed(1)}x</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-[9px] font-mono text-slate-500">0.2x</span>
+                  <input
+                    type="range"
+                    min="0.2"
+                    max="3.0"
+                    step="0.1"
+                    value={starSpeed}
+                    onChange={e => {
+                      const val = parseFloat(e.target.value);
+                      setStarSpeed(val);
+                      localStorage.setItem("rmx_star_speed", String(val));
+                    }}
+                    className="flex-1 accent-[#A78BFA] bg-slate-800 rounded-lg h-1"
+                  />
+                  <span className="text-[9px] font-mono text-slate-500">3.0x</span>
+                </div>
+              </div>
+
+              {/* Audio feedback sound toggle */}
+              <div className="flex items-center justify-between border-t border-white/5 pt-3">
+                <div className="flex items-center gap-2 font-mono">
+                  {audioEnabled ? (
+                    <Volume2 className="w-4 h-4 text-[#10F5A0]" />
+                  ) : (
+                    <VolumeX className="w-4 h-4 text-slate-500" />
+                  )}
+                  <div>
+                    <div className="text-[10px] font-bold text-slate-300">SYNTH SOUND EFFECTS</div>
+                    <div className="text-[8px] text-slate-500 font-bold">Dual-tone thrum alerts when checking items</div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setAudioEnabled(prev => {
+                      const next = !prev;
+                      localStorage.setItem("rmx_audio_enabled", String(next));
+                      playSuccessBeep(next);
+                      return next;
+                    });
+                  }}
+                  className={`w-10 h-5 rounded-full p-0.5 transition-all duration-300 flex items-center ${audioEnabled ? "bg-[#10F5A0] justify-end" : "bg-slate-800 justify-start"}`}
+                >
+                  <span className="w-4 h-4 rounded-full bg-slate-900 shadow-md" />
+                </button>
+              </div>
+
+              {/* Safety Clear Logs Progress Reset Action */}
+              <div className="flex items-center justify-between border-t border-white/5 pt-3">
+                <div className="font-mono">
+                  <div className="text-[10px] font-bold text-slate-300">SAFETY DEEP CLEAN</div>
+                  <div className="text-[8px] text-slate-500">Wipes local completed roadmap metrics</div>
+                </div>
+                <button
+                  onClick={() => {
+                    if (window.confirm("ARE YOU ABSOLUTELY SURE? This will permanently wipe your local completed roadmap milestones from this machine.")) {
+                      localStorage.removeItem("rmx_done");
+                      localStorage.removeItem("rmx_bkm");
+                      localStorage.removeItem("rmx_weekly_habits");
+                      localStorage.removeItem("rmx_elite_done");
+                      setDone({});
+                      setBkm({});
+                      setWeeklyHabits({});
+                      setEliteDone({});
+                      playSweepSound(audioEnabled, false);
+                      setPortalOpen(false);
+                      window.location.reload();
+                    }
+                  }}
+                  className="px-2.5 py-1 rounded border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/40 text-red-400 font-mono text-[9px] transition-all duration-150"
+                >
+                  WIPE CHANNELS
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Footer status credits bar */}
+          <div className="p-3 border-t border-white/10 text-center font-mono text-[8px] text-slate-500" style={{ background: "rgba(10, 22, 40, 0.4)" }}>
+            FLOW_16_SYSTEMS_CORE // STATUS: COGNITIVE_ACTIVE
+          </div>
+        </motion.div>
+      </>
+    )}
+  </AnimatePresence>
 
   {/* Celebratory Animation Overlay */}
   <CelebrationOverlay active={confetti !== null} />
