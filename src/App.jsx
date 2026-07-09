@@ -2399,6 +2399,7 @@ export default function App(){
         body: JSON.stringify({
           message: userText,
           history,
+          highThinkingEnabled,
         })
       });
 
@@ -2407,7 +2408,12 @@ export default function App(){
       }
 
       const data = await res.json();
-      const modelMessage = { role: "model", parts: [{ text: data.text }] };
+      const modelMessage = { 
+        role: "model", 
+        parts: [{ text: data.text }],
+        groundingChunks: data.groundingChunks,
+        searchQueries: data.searchQueries
+      };
       const nextMessages = [...updatedMessages, modelMessage];
       setAiMessages(nextMessages);
       localStorage.setItem("rmx_ai_messages", JSON.stringify(nextMessages));
@@ -4005,7 +4011,7 @@ export default function App(){
             position: "fixed",
             inset: 0,
             zIndex: 1000,
-            backgroundColor: "rgba(0, 0, 0, 0.75)",
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
             backdropFilter: "blur(12px)",
             WebkitBackdropFilter: "blur(12px)"
           }}
@@ -4022,13 +4028,14 @@ export default function App(){
             position: "fixed",
             top: 0,
             right: 0,
-            height: "100%",
+            height: "100vh",
             width: "100%",
             maxWidth: "480px",
             zIndex: 1001,
-            backgroundColor: "#050d1a",
-            backgroundImage: "linear-gradient(180deg, #071324 0%, #030811 100%)",
-            boxShadow: "-12px 0 40px rgba(0,0,0,0.9)",
+            backgroundColor: "rgba(3, 8, 18, 0.72)",
+            backdropFilter: "blur(24px) saturate(180%)",
+            WebkitBackdropFilter: "blur(24px) saturate(180%)",
+            boxShadow: "-12px 0 40px rgba(0,0,0,0.85), inset 1px 0 0 rgba(255,255,255,0.06)",
             display: "flex",
             flexDirection: "column",
             fontFamily: "var(--font-sans)",
@@ -4036,12 +4043,14 @@ export default function App(){
           }}
         >
           {/* Header */}
-          <div className="p-4 border-b border-white/10 flex items-center justify-between" style={{ background: "rgba(10, 22, 40, 0.4)" }}>
-            <div className="flex items-center gap-2">
-              <Brain className="w-5 h-5 text-[#A78BFA] animate-pulse" />
+          <div className="p-4 border-b border-white/10 flex items-center justify-between" style={{ background: "rgba(255, 255, 255, 0.02)", backdropFilter: "blur(10px)" }}>
+            <div className="flex items-center gap-3">
+              <div className="p-1.5 rounded-xl bg-[#A78BFA]/10 border border-[#A78BFA]/20 shadow-[0_0_15px_rgba(167,139,250,0.15)] flex items-center justify-center">
+                <Brain className="w-4 h-4 text-[#A78BFA] animate-pulse" />
+              </div>
               <div>
-                <div className="text-[11px] tracking-widest font-mono text-[#A78BFA] font-bold">SYSTEMS INTEGRITY</div>
-                <div className="text-xs font-mono font-medium text-slate-300">FLOW 16 SECTORS PORTAL</div>
+                <div className="text-[9px] tracking-[0.18em] font-mono text-[#A78BFA]/90 font-bold uppercase leading-none mb-1">SYSTEMS INTEGRITY</div>
+                <div className="text-xs font-mono font-black text-slate-100 tracking-wide uppercase">FLOW 16 SECTORS PORTAL</div>
               </div>
             </div>
             
@@ -4050,7 +4059,7 @@ export default function App(){
                 setPortalOpen(false);
                 playSweepSound(audioEnabled, false);
               }}
-              className="p-1.5 rounded-full hover:bg-white/5 border border-transparent hover:border-white/10 text-slate-400 hover:text-white transition-all duration-200"
+              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-[#A78BFA]/30 text-slate-300 hover:text-white transition-all duration-200 flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]"
             >
               <X className="w-4 h-4" />
             </button>
@@ -4060,13 +4069,20 @@ export default function App(){
           <div className="flex-1 overflow-y-auto p-4 space-y-6 no-scrollbar">
             
             {/* 1. Google Cloud Sync & Auth Section */}
-            <div className="rounded-xl border border-white/10 p-4 space-y-3" style={{ background: "rgba(10, 22, 40, 0.3)" }}>
+            <div 
+              className="border border-white/10 p-5 space-y-4 shadow-xl rounded-2xl" 
+              style={{ 
+                background: "linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)"
+              }}
+            >
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono tracking-widest font-bold text-[#A78BFA]">
-                  ☁️ CLOUD SYNC & AUTHENTICATION
+                <span className="text-[10px] font-mono tracking-[0.12em] font-black text-[#A78BFA] flex items-center gap-1.5 uppercase">
+                  <span>☁️</span> CLOUD SYNC & AUTHENTICATION
                 </span>
                 {user && (
-                  <span className="text-[9px] font-mono font-bold text-[#10F5A0] flex items-center gap-1.5 bg-[#10F5A0]/10 px-2 py-0.5 rounded-full border border-[#10F5A0]/20 font-bold">
+                  <span className="text-[8px] font-mono font-black text-[#10F5A0] flex items-center gap-1.5 bg-[#10F5A0]/10 px-2.5 py-1 rounded-full border border-[#10F5A0]/25 shadow-[0_0_10px_rgba(16,245,160,0.15)]">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#10F5A0] animate-pulse" />
                     CONNECTED
                   </span>
@@ -4074,17 +4090,18 @@ export default function App(){
               </div>
 
               {authLoading ? (
-                <div className="py-4 text-center text-slate-400 text-xs font-mono animate-pulse">
-                  Verifying server keys & authentication status…
+                <div className="py-6 text-center text-slate-400 text-xs font-mono animate-pulse flex flex-col items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-[#A78BFA]/30 border-t-[#A78BFA] rounded-full animate-spin" />
+                  <span>Verifying secure workspace handshake…</span>
                 </div>
               ) : !user ? (
-                <div className="space-y-3">
-                  <p className="text-xs text-slate-400 leading-relaxed font-mono">
+                <div className="space-y-4">
+                  <p className="text-[11px] text-slate-400 leading-relaxed font-mono">
                     Connect your secure Google workspace to synchronize and back up roadmap items, notebooks, custom cheat sheets, bookmarks, and habit metrics.
                   </p>
                   <button
                     onClick={handleGoogleSignIn}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-white/10 bg-white/5 text-xs font-mono font-semibold text-white hover:bg-white/10 hover:border-[#A78BFA]/30 transition-all duration-200"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-[#A78BFA]/20 bg-gradient-to-r from-[#A78BFA]/10 to-[#8B5CF6]/15 text-xs font-mono font-black text-white hover:bg-gradient-to-r hover:from-[#A78BFA]/15 hover:to-[#8B5CF6]/25 hover:border-[#A78BFA]/40 shadow-[0_0_15px_rgba(167,139,250,0.1)] hover:shadow-[0_0_25px_rgba(167,139,250,0.25)] transition-all duration-300"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
                       <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.514 5.514 0 0 1 8.5 13c0-3.04 2.46-5.514 5.5-5.514 1.342 0 2.57.486 3.524 1.286l3.057-3.057C18.733 3.943 16.514 3 14 3a10 10 0 0 0-10 10 10 10 0 0 0 10 10c5.52 0 10-4.48 10-10 0-.685-.06-1.354-.171-2H12.24z"/>
@@ -4093,27 +4110,27 @@ export default function App(){
                   </button>
 
                   {authError && (
-                    <div className="p-2.5 bg-red-500/10 border border-red-500/20 rounded-lg text-[10px] font-mono text-red-400 leading-normal">
+                    <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-[10px] font-mono text-red-400 leading-normal">
                       ⚠ {authError}
                     </div>
                   )}
 
-                  <div className="pt-2 border-t border-white/5 space-y-2">
-                    <div className="text-[8px] font-mono tracking-widest text-slate-500 text-center uppercase">
+                  <div className="pt-3 border-t border-white/5 space-y-3">
+                    <div className="text-[8px] font-mono tracking-[0.15em] text-slate-500 text-center uppercase font-black">
                       — OR BYPASS IFRAME WITH SANDBOX ACCESS —
                     </div>
-                    <form onSubmit={handleSandboxLogin} className="flex gap-1.5">
+                    <form onSubmit={handleSandboxLogin} className="flex gap-2">
                       <input
                         type="text"
                         value={sandboxName}
                         onChange={e => setSandboxName(e.target.value)}
                         placeholder="Enter hacker name (e.g. Neo)..."
-                        className="flex-1 bg-black/40 border border-white/10 rounded px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-[#A78BFA]/50 transition-all placeholder:text-slate-600"
+                        className="flex-1 bg-slate-950/40 border border-white/10 rounded-xl px-3 py-2 text-xs font-mono text-white placeholder:text-slate-600 focus:outline-none focus:border-[#A78BFA]/40 focus:ring-1 focus:ring-[#A78BFA]/10 transition-all duration-200"
                       />
                       <button
                         type="submit"
                         disabled={!sandboxName.trim()}
-                        className="px-3 py-1.5 rounded bg-[#A78BFA]/10 border border-[#A78BFA]/25 text-[#A78BFA] hover:bg-[#A78BFA]/20 text-[10px] font-mono font-bold transition-all disabled:opacity-40 disabled:hover:bg-[#A78BFA]/10"
+                        className="px-4 py-2 rounded-xl bg-[#A78BFA]/10 border border-[#A78BFA]/30 text-[#A78BFA] hover:bg-[#A78BFA]/20 text-[10px] font-mono font-black tracking-widest transition-all disabled:opacity-40 disabled:hover:bg-[#A78BFA]/10"
                       >
                         LOGIN
                       </button>
@@ -4121,35 +4138,41 @@ export default function App(){
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 bg-white/5 p-3 rounded-lg border border-white/5">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-4 bg-slate-950/40 p-4 rounded-xl border border-white/5 shadow-inner">
                     {user.photoURL ? (
-                      <img
-                        src={user.photoURL}
-                        alt={user.displayName}
-                        referrerPolicy="no-referrer"
-                        className="w-9 h-9 rounded-full border-2 border-[#A78BFA]"
-                      />
+                      <div className="relative">
+                        <img
+                          src={user.photoURL}
+                          alt={user.displayName}
+                          referrerPolicy="no-referrer"
+                          className="w-11 h-11 rounded-full border-2 border-[#A78BFA] shadow-[0_0_15px_rgba(167,139,250,0.3)] object-cover"
+                        />
+                        <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#10F5A0] border-2 border-slate-950 animate-pulse" />
+                      </div>
                     ) : (
-                      <div className="w-9 h-9 rounded-full bg-[#A78BFA] text-black flex items-center justify-center font-mono font-bold text-sm">
-                        {user.displayName ? user.displayName[0].toUpperCase() : "U"}
+                      <div className="relative">
+                        <div className="w-11 h-11 rounded-full bg-[#A78BFA] text-black flex items-center justify-center font-mono font-black text-base shadow-[0_0_15px_rgba(167,139,250,0.3)]">
+                          {user.displayName ? user.displayName[0].toUpperCase() : "U"}
+                        </div>
+                        <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#10F5A0] border-2 border-slate-950 animate-pulse" />
                       </div>
                     )}
                     <div className="min-w-0 flex-1 font-mono">
-                      <div className="text-xs font-bold text-slate-100 truncate flex items-center gap-1.5">
-                        {user.displayName || "Explorer"}
+                      <div className="text-xs font-black text-slate-100 truncate flex items-center gap-2">
+                        <span>{user.displayName || "Explorer"}</span>
                         {user.isSandbox && (
-                          <span className="text-[8px] tracking-wider px-1 py-0.5 rounded bg-[#A78BFA]/20 text-[#A78BFA] border border-[#A78BFA]/30 uppercase font-bold">
+                          <span className="text-[8px] tracking-widest px-2 py-0.5 rounded-full bg-[#A78BFA]/15 text-[#A78BFA] border border-[#A78BFA]/35 uppercase font-black">
                             SANDBOX
                           </span>
                         )}
                       </div>
-                      <div className="text-[10px] text-slate-400 truncate">{user.email}</div>
+                      <div className="text-[10px] text-slate-500 truncate mt-0.5">{user.email}</div>
                     </div>
                   </div>
                   <button
                     onClick={handleDisconnect}
-                    className="w-full py-1.5 rounded-lg border border-red-500/10 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/20 text-red-400 text-xs font-mono font-medium transition-all duration-200"
+                    className="w-full py-2 rounded-xl border border-red-500/15 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/30 text-red-400 text-[10px] font-mono font-black tracking-widest uppercase transition-all duration-200"
                   >
                     DISCONNECT IDENTITY
                   </button>
@@ -4158,33 +4181,48 @@ export default function App(){
             </div>
 
             {/* 2. Systems Copilot & High-Thinking Oracle Section */}
-            <div className="rounded-xl border border-white/10 p-4 flex flex-col space-y-3" style={{ background: "rgba(10, 22, 40, 0.3)" }}>
+            <div 
+              className="border border-white/10 p-5 flex flex-col space-y-4 shadow-xl rounded-2xl" 
+              style={{ 
+                background: "linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)"
+              }}
+            >
               {/* Tabs Navigation */}
-              <div className="flex border-b border-white/10 pb-1 gap-4">
+              <div className="flex p-1 rounded-xl bg-slate-950/40 border border-white/5 gap-1 shadow-inner">
                 <button
                   onClick={() => {
                     setActivePortalTab("chat");
                     playSweepSound(audioEnabled, true);
                   }}
-                  className={`pb-1.5 font-mono text-[10px] font-bold tracking-wider transition-all border-b-2 ${activePortalTab === "chat" ? "border-[#A78BFA] text-[#A78BFA]" : "border-transparent text-slate-400 hover:text-slate-200"}`}
+                  className={`flex-1 py-1.5 rounded-lg text-[9px] tracking-widest font-mono font-black transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                    activePortalTab === "chat"
+                      ? "bg-[#A78BFA]/10 border border-[#A78BFA]/20 text-[#A78BFA] shadow-[0_2px_8px_rgba(167,139,250,0.15)]"
+                      : "text-slate-400 hover:text-slate-200 border border-transparent"
+                  }`}
                 >
-                  💬 COPILOT CHAT
+                  <span>💬</span> COPILOT CHAT
                 </button>
                 <button
                   onClick={() => {
                     setActivePortalTab("academy");
                     playSweepSound(audioEnabled, true);
                   }}
-                  className={`pb-1.5 font-mono text-[10px] font-bold tracking-wider transition-all border-b-2 ${activePortalTab === "academy" ? "border-[#A78BFA] text-[#A78BFA]" : "border-transparent text-slate-400 hover:text-slate-200"}`}
+                  className={`flex-1 py-1.5 rounded-lg text-[9px] tracking-widest font-mono font-black transition-all duration-200 flex items-center justify-center gap-1.5 ${
+                    activePortalTab === "academy"
+                      ? "bg-[#A78BFA]/10 border border-[#A78BFA]/20 text-[#A78BFA] shadow-[0_2px_8px_rgba(167,139,250,0.15)]"
+                      : "text-slate-400 hover:text-slate-200 border border-transparent"
+                  }`}
                 >
-                  🎓 SYSTEMS ACADEMY
+                  <span>🎓</span> SYSTEMS ACADEMY
                 </button>
               </div>
 
               {activePortalTab === "chat" ? (
-                <div className="space-y-3 flex flex-col">
+                <div className="space-y-4 flex flex-col">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono tracking-widest font-bold text-[#A78BFA]">
+                    <span className="text-[10px] font-mono tracking-[0.12em] font-black text-[#A78BFA] uppercase">
                       🧠 SYSTEMS AI COPILOT
                     </span>
                     
@@ -4194,28 +4232,57 @@ export default function App(){
                         setHighThinkingEnabled(prev => !prev);
                         playSweepSound(audioEnabled, !highThinkingEnabled);
                       }}
-                      className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[9px] font-mono font-bold transition-all duration-300 ${highThinkingEnabled ? "bg-[#A78BFA]/15 text-[#A78BFA] border-[#A78BFA]/30 shadow-[0_0_10px_rgba(167,139,250,0.15)]" : "bg-slate-800 text-slate-400 border-transparent"}`}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-[9px] font-mono font-black transition-all duration-300 ${highThinkingEnabled ? "bg-[#A78BFA]/15 text-[#A78BFA] border-[#A78BFA]/30 shadow-[0_0_12px_rgba(167,139,250,0.2)]" : "bg-slate-950/40 text-slate-500 border-white/5"}`}
                     >
                       <Brain className={`w-3 h-3 ${highThinkingEnabled ? "animate-pulse" : ""}`} />
                       THINKING: {highThinkingEnabled ? "HIGH" : "FAST"}
                     </button>
                   </div>
 
-                  <div className="text-[10px] font-mono text-slate-400 leading-relaxed">
-                    Mode: <span className="text-[#A78BFA]">{highThinkingEnabled ? "gemini-3.1-pro-preview" : "gemini-3.5-flash"}</span>. Powered by server-side proxy encryption.
+                  <div className="text-[9px] font-mono text-slate-500 tracking-wider uppercase leading-relaxed">
+                    ENGINE: <span className="text-[#A78BFA] font-bold">{highThinkingEnabled ? "gemini-3.1-pro-preview" : "gemini-3.5-flash"}</span> // PROXY ENCRYPTION: ACTIVE
                   </div>
 
                   {/* Chat Display Window */}
-                  <div className="h-64 rounded-lg bg-black/40 border border-white/5 p-3 overflow-y-auto space-y-3 flex flex-col no-scrollbar">
+                  <div className="h-64 rounded-2xl bg-slate-950/40 border border-white/5 p-4 overflow-y-auto space-y-4 flex flex-col no-scrollbar shadow-inner">
                     {aiMessages.map((msg, i) => (
                       <div key={i} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
                         <span className="text-[8px] font-mono text-slate-500 mb-0.5 tracking-widest uppercase">
                           {msg.role === "user" ? "EXPLORER" : "AI ENGINE"}
                         </span>
                         <div
-                          className={`max-w-[85%] rounded-lg p-2.5 text-xs font-mono leading-relaxed whitespace-pre-wrap select-text ${msg.role === "user" ? "bg-[#A78BFA]/10 border border-[#A78BFA]/20 text-white" : "bg-white/5 border border-white/5 text-slate-300"}`}
+                          className={`max-w-[85%] rounded-2xl p-3 text-xs font-mono leading-relaxed whitespace-pre-wrap select-text shadow-sm ${msg.role === "user" ? "bg-gradient-to-br from-[#A78BFA]/15 to-[#8B5CF6]/10 border border-[#A78BFA]/25 text-white" : "bg-white/5 border border-white/5 text-slate-300"}`}
                         >
                           {msg.parts[0].text}
+                          
+                          {/* Search grounding citations */}
+                          {msg.role === "model" && msg.groundingChunks && msg.groundingChunks.length > 0 && (
+                            <div className="mt-2 pt-1.5 border-t border-white/5 space-y-1 select-none">
+                              <div className="text-[8px] font-mono text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1">
+                                <span>🔍</span> GROUNDED SEARCH SOURCES:
+                              </div>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {msg.groundingChunks.map((chunk, cIdx) => {
+                                  const uri = chunk.web?.uri;
+                                  const title = chunk.web?.title || uri;
+                                  if (!uri) return null;
+                                  return (
+                                    <a
+                                      key={cIdx}
+                                      href={uri}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white/5 hover:bg-[#A78BFA]/10 hover:text-[#A78BFA] text-[9px] text-slate-300 transition-all duration-200 border border-white/5 hover:border-[#A78BFA]/30 max-w-[130px] truncate shadow-sm"
+                                      title={title}
+                                    >
+                                      <span className="text-[#A78BFA] font-bold">[{cIdx + 1}]</span>
+                                      <span className="truncate">{title}</span>
+                                    </a>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -4225,7 +4292,7 @@ export default function App(){
                         <span className="text-[8px] font-mono text-[#A78BFA] mb-0.5 tracking-widest animate-pulse uppercase">
                           THINKING PROCESS ACTIVE
                         </span>
-                        <div className="bg-purple-500/5 border border-[#A78BFA]/10 rounded-lg p-3 text-xs font-mono text-[#A78BFA] flex items-center gap-2.5">
+                        <div className="bg-purple-500/5 border border-[#A78BFA]/10 rounded-2xl p-3.5 text-xs font-mono text-[#A78BFA] flex items-center gap-2.5">
                           <span className="flex h-2 w-2 relative">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#A78BFA] opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-[#A78BFA]"></span>
@@ -4239,7 +4306,7 @@ export default function App(){
                       </div>
                     )}
                   </div>
-
+ 
                   {/* Quick Prompt Scrollable Row */}
                   <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
                     {[
@@ -4252,7 +4319,7 @@ export default function App(){
                         key={idx}
                         onClick={() => handleSendAiMessage(item.prompt)}
                         disabled={aiLoading}
-                        className="flex-shrink-0 px-2.5 py-1 text-[9px] font-mono rounded-md border border-white/5 bg-white/5 hover:bg-white/10 hover:border-[#A78BFA]/20 text-slate-300 hover:text-white transition-all duration-150 disabled:opacity-50"
+                        className="flex-shrink-0 px-3 py-1.5 text-[9px] font-mono rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 hover:border-[#A78BFA]/20 text-slate-300 hover:text-white transition-all duration-150 disabled:opacity-50 shadow-sm animate-fade-in"
                       >
                         {item.label}
                       </button>
@@ -4267,12 +4334,12 @@ export default function App(){
                       onChange={e => setAiInput(e.target.value)}
                       disabled={aiLoading}
                       placeholder={aiLoading ? "Thinking..." : "Ask your systems oracle..."}
-                      className="flex-1 min-w-0 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#A78BFA]/50 transition-all disabled:opacity-50"
+                      className="flex-1 min-w-0 bg-slate-950/40 border border-white/10 rounded-xl px-3.5 py-2.5 text-xs font-mono text-white placeholder:text-slate-600 focus:outline-none focus:border-[#A78BFA]/40 focus:ring-1 focus:ring-[#A78BFA]/10 transition-all disabled:opacity-50"
                     />
                     <button
                       type="submit"
                       disabled={aiLoading || !aiInput.trim()}
-                      className="p-2 rounded-lg bg-[#A78BFA] hover:bg-purple-400 disabled:bg-slate-800 disabled:text-slate-600 text-black font-semibold flex items-center justify-center transition-all duration-150"
+                      className="p-2.5 rounded-xl bg-gradient-to-br from-[#A78BFA] to-[#8B5CF6] hover:brightness-110 disabled:bg-slate-800 disabled:text-slate-600 text-black font-black flex items-center justify-center transition-all duration-200 shadow-md"
                     >
                       <Send className="w-4 h-4 text-black" />
                     </button>
@@ -4280,24 +4347,24 @@ export default function App(){
                       type="button"
                       onClick={handleClearChat}
                       title="Clear conversation log"
-                      className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 hover:text-white transition-all duration-150"
+                      className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-slate-400 hover:text-white transition-all duration-200 shadow-sm"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </form>
                 </div>
               ) : (
-                <div className="space-y-4 flex flex-col">
+                <div className="space-y-4 flex flex-col animate-fade-in">
                   {/* Systems Academy Topic Picker or Lesson Viewer */}
                   {!lessonData && !lessonLoading ? (
-                    <div className="space-y-3">
-                      <p className="text-[11px] font-mono text-slate-400 leading-relaxed bg-white/5 p-2.5 rounded-lg border border-white/5">
+                    <div className="space-y-4">
+                      <p className="text-[11px] font-mono text-slate-400 leading-relaxed bg-white/5 p-3 rounded-xl border border-white/5 shadow-inner">
                         Welcome to the <strong>Flow 16 Academy</strong>. Select a high-performance system curriculum or define your own. The oracle will generate deep-dive lessons, interactive checkpoint quizzes, and saveable cheat sheet study notes!
                       </p>
 
-                      <div className="space-y-1.5">
-                        <span className="text-[9px] font-mono font-bold tracking-wider text-slate-400">CURRICULUM PRESETS:</span>
-                        <div className="grid grid-cols-1 gap-1.5">
+                      <div className="space-y-2">
+                        <span className="text-[9px] font-mono font-black tracking-[0.15em] text-[#A78BFA]/85 uppercase">CURRICULUM PRESETS:</span>
+                        <div className="grid grid-cols-1 gap-2">
                           {[
                             { label: "🐳 Docker Isolation & namespaces", topic: "Docker Namespaces and cgroups Process Isolation" },
                             { label: "💾 Postgres Shared & Exclusive Locks", topic: "PostgreSQL Shared and Exclusive Locks, Row-Level locks, and Deadlocks" },
@@ -4308,7 +4375,7 @@ export default function App(){
                             <button
                               key={idx}
                               onClick={() => handleGenerateLesson(item.topic)}
-                              className="w-full text-left p-2.5 rounded-lg border border-white/5 bg-white/5 hover:bg-[#A78BFA]/10 hover:border-[#A78BFA]/30 transition-all text-xs font-mono text-slate-300 hover:text-white"
+                              className="w-full text-left p-3 rounded-xl border border-white/5 bg-white/3 hover:bg-[#A78BFA]/10 hover:border-[#A78BFA]/25 hover:translate-x-1 text-xs font-mono text-slate-300 hover:text-white transition-all duration-200 shadow-sm"
                             >
                               {item.label}
                             </button>
@@ -4316,20 +4383,20 @@ export default function App(){
                         </div>
                       </div>
 
-                      <div className="space-y-1.5 pt-2 border-t border-white/10">
-                        <span className="text-[9px] font-mono font-bold tracking-wider text-slate-400">DEFINE CUSTOM CLASSROOM SYLLABUS:</span>
+                      <div className="space-y-2 pt-3 border-t border-white/5">
+                        <span className="text-[9px] font-mono font-black tracking-[0.15em] text-[#A78BFA]/85 uppercase">DEFINE CUSTOM CLASSROOM SYLLABUS:</span>
                         <div className="flex gap-2">
                           <input
                             type="text"
                             value={customAcademyTopic}
                             onChange={e => setCustomAcademyTopic(e.target.value)}
                             placeholder="e.g. TCP Slow Start, Rust lifecycles..."
-                            className="flex-1 min-w-0 bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-xs font-mono text-white focus:outline-none focus:border-[#A78BFA]/50 transition-all"
+                            className="flex-1 min-w-0 bg-slate-950/40 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-mono text-white placeholder:text-slate-600 focus:outline-none focus:border-[#A78BFA]/40 focus:ring-1 focus:ring-[#A78BFA]/10 transition-all"
                           />
                           <button
                             onClick={() => handleGenerateLesson()}
                             disabled={!customAcademyTopic.trim()}
-                            className="px-3.5 py-2 rounded-lg bg-[#A78BFA] hover:bg-purple-400 disabled:bg-slate-800 disabled:text-slate-600 text-black font-semibold font-mono text-xs transition-all"
+                            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#A78BFA] to-[#8B5CF6] hover:brightness-110 disabled:bg-slate-800 disabled:text-slate-600 text-black font-black font-mono text-xs transition-all duration-200 shadow-md"
                           >
                             STUDY
                           </button>
@@ -4339,7 +4406,7 @@ export default function App(){
                   ) : lessonLoading ? (
                     <div className="py-12 flex flex-col items-center justify-center space-y-3 font-mono">
                       <RefreshCw className="w-8 h-8 text-[#A78BFA] animate-spin" />
-                      <div className="text-center text-xs text-[#A78BFA] animate-pulse">
+                      <div className="text-center text-xs text-[#A78BFA] animate-pulse uppercase tracking-wider font-black">
                         COMPILING INTERACTIVE LESSON...
                       </div>
                       <div className="text-[9px] text-slate-500 text-center max-w-xs leading-relaxed">
@@ -4354,16 +4421,23 @@ export default function App(){
                         </h4>
                         <button
                           onClick={() => setLessonData(null)}
-                          className="px-2 py-0.5 rounded border border-white/10 hover:border-white/30 text-slate-400 hover:text-white font-mono text-[9px] transition-all"
+                          className="px-3 py-1 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#A78BFA]/30 text-slate-300 hover:text-white font-mono text-[9px] tracking-wider transition-all duration-200 shadow-sm"
                         >
                           RESET
                         </button>
                       </div>
 
                       {/* Lesson Content Reading */}
-                      <div className="rounded-lg bg-black/40 border border-white/5 p-3.5 space-y-2.5">
-                        <div className="text-[10px] font-mono font-bold text-[#A78BFA]/80 tracking-widest uppercase">
-                          📖 SECTION 1: LECTURE GUIDE
+                      <div 
+                        className="rounded-2xl border border-white/10 p-5 space-y-3 shadow-xl"
+                        style={{ 
+                          background: "linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%)",
+                          backdropFilter: "blur(16px)",
+                          WebkitBackdropFilter: "blur(16px)"
+                        }}
+                      >
+                        <div className="text-[10px] font-mono font-black text-[#A78BFA] tracking-[0.12em] uppercase flex items-center gap-1.5">
+                          <span>📖</span> SECTION 1: LECTURE GUIDE
                         </div>
                         <div className="text-[11px] font-sans text-slate-300 leading-relaxed">
                           <Md text={lessonData.lessonContent} color="#A78BFA" />
@@ -4371,20 +4445,27 @@ export default function App(){
                       </div>
 
                       {/* Interactive Quiz Checkpoint */}
-                      <div className="rounded-lg bg-black/40 border border-white/5 p-3.5 space-y-3.5">
-                        <div className="text-[10px] font-mono font-bold text-[#A78BFA]/80 tracking-widest uppercase">
-                          📝 SECTION 2: CHECKPOINT QUIZ
+                      <div 
+                        className="rounded-2xl border border-white/10 p-5 space-y-4 shadow-xl"
+                        style={{ 
+                          background: "linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%)",
+                          backdropFilter: "blur(16px)",
+                          WebkitBackdropFilter: "blur(16px)"
+                        }}
+                      >
+                        <div className="text-[10px] font-mono font-black text-[#A78BFA] tracking-[0.12em] uppercase flex items-center gap-1.5">
+                          <span>📝</span> SECTION 2: CHECKPOINT QUIZ
                         </div>
                         {lessonData.quizQuestions && lessonData.quizQuestions.map((q, qIdx) => {
                           const selectedOpt = selectedAnswers[qIdx];
                           return (
-                            <div key={qIdx} className="space-y-2 border-t border-white/5 pt-3 first:border-0 first:pt-0">
+                            <div key={qIdx} className="space-y-3 border-t border-white/5 pt-4 first:border-0 first:pt-0">
                               <div className="text-xs font-mono font-semibold text-slate-200">
                                 Q{qIdx + 1}: {q.question}
                               </div>
-                              <div className="grid grid-cols-1 gap-1.5">
+                              <div className="grid grid-cols-1 gap-2">
                                 {q.options.map((opt, optIdx) => {
-                                  let btnStyle = "border-white/10 bg-white/5 hover:bg-white/10 text-slate-300";
+                                  let btnStyle = "border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 hover:border-[#A78BFA]/20";
                                   if (quizSubmitted) {
                                     if (optIdx === q.correctIndex) {
                                       btnStyle = "border-emerald-500/50 bg-emerald-500/10 text-emerald-400 font-bold";
@@ -4404,7 +4485,7 @@ export default function App(){
                                         setSelectedAnswers(prev => ({ ...prev, [qIdx]: optIdx }));
                                         playSuccessBeep(audioEnabled);
                                       }}
-                                      className={`w-full text-left p-2 rounded-lg border text-[10px] font-mono transition-all ${btnStyle}`}
+                                      className={`w-full text-left p-3 rounded-xl border text-[10px] font-mono transition-all duration-200 ${btnStyle}`}
                                     >
                                       {opt}
                                     </button>
@@ -4412,7 +4493,7 @@ export default function App(){
                                 })}
                               </div>
                               {quizSubmitted && (
-                                <div className="text-[9px] font-mono text-slate-400 bg-white/5 border border-white/5 p-2 rounded-md leading-relaxed mt-1">
+                                <div className="text-[9px] font-mono text-slate-400 bg-slate-950/40 border border-white/5 p-3 rounded-xl leading-relaxed mt-1">
                                   <span className="font-bold block mb-1 text-slate-300">
                                     {selectedOpt === q.correctIndex ? "✅ Correct!" : "❌ Incorrect."}
                                   </span>
@@ -4430,7 +4511,7 @@ export default function App(){
                               playSuccessBeep(audioEnabled);
                             }}
                             disabled={Object.keys(selectedAnswers).length < (lessonData.quizQuestions?.length || 3)}
-                            className="w-full py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-black font-semibold font-mono text-[11px] transition-all"
+                            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:brightness-110 disabled:opacity-40 text-black font-black font-mono text-xs transition-all duration-200 shadow-md"
                           >
                             SUBMIT ANSWERS
                           </button>
@@ -4440,7 +4521,7 @@ export default function App(){
                               setQuizSubmitted(false);
                               setSelectedAnswers({});
                             }}
-                            className="w-full py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 font-mono text-[11px] transition-all"
+                            className="w-full py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 font-mono text-xs transition-all duration-200 shadow-sm"
                           >
                             RETRY QUIZ
                           </button>
@@ -4448,32 +4529,38 @@ export default function App(){
                       </div>
 
                       {/* Editable summary notes summary notes */}
-                      <div className="rounded-lg bg-black/40 border border-white/5 p-3.5 space-y-3">
+                      <div 
+                        className="rounded-2xl border border-white/10 p-5 space-y-4 shadow-xl"
+                        style={{ 
+                          background: "linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%)",
+                          backdropFilter: "blur(16px)",
+                          WebkitBackdropFilter: "blur(16px)"
+                        }}
+                      >
                         <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-mono font-bold text-[#A78BFA]/80 tracking-widest uppercase">
-                            📋 SECTION 3: STUDY NOTES SUMMARY
+                          <span className="text-[10px] font-mono font-black text-[#A78BFA] tracking-[0.12em] uppercase flex items-center gap-1.5">
+                            <span>📋</span> SECTION 3: STUDY NOTES SUMMARY
                           </span>
                         </div>
                         <textarea
                           value={editableNotes}
                           onChange={e => setEditableNotes(e.target.value)}
                           rows={8}
-                          className="w-full bg-black/50 border border-white/10 rounded-lg p-2.5 text-[10px] font-mono text-slate-200 focus:outline-none focus:border-[#A78BFA]/50 resize-y leading-relaxed"
+                          className="w-full bg-slate-950/40 border border-white/10 rounded-xl p-3.5 text-[10px] font-mono text-slate-200 focus:outline-none focus:border-[#A78BFA]/40 focus:ring-1 focus:ring-[#A78BFA]/10 resize-y leading-relaxed shadow-inner"
                         />
                         <div className="flex gap-2">
                           <button
                             onClick={handleSaveLessonNotes}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[#A78BFA] hover:bg-purple-400 text-black text-xs font-mono font-bold transition-all shadow-md"
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-[#A78BFA] to-[#8B5CF6] hover:brightness-110 text-black text-xs font-mono font-black transition-all duration-200 shadow-md"
                           >
-                            💾 {notesSavedStatus === "saved" ? "SAVED!" : notesSavedStatus === "saving" ? "SAVING..." : "SAVE TO CHEAT SHEETS"}
+                            <span>💾</span> {notesSavedStatus === "saved" ? "SAVED!" : notesSavedStatus === "saving" ? "SAVING..." : "SAVE TO CHEAT SHEETS"}
                           </button>
                           <button
                             onClick={() => {
                               navigator.clipboard.writeText(editableNotes);
-                              alert("Lesson summary notes copied to clipboard!");
                               playSuccessBeep(audioEnabled);
                             }}
-                            className="px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 font-mono text-[10px] transition-all"
+                            className="px-4 py-2.5 rounded-xl border border-white/5 bg-white/5 hover:bg-white/10 text-slate-300 font-mono text-[10px] transition-all duration-200 shadow-sm"
                           >
                             COPY NOTES
                           </button>
@@ -4488,7 +4575,7 @@ export default function App(){
                           setLessonData(null);
                           playSuccessBeep(audioEnabled);
                         }}
-                        className="w-full py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white font-mono text-[11px] transition-all"
+                        className="w-full py-3 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white font-mono text-[10px] tracking-widest uppercase transition-all duration-200 shadow-sm"
                       >
                         ⬅️ BACK TO ACADEMY TOPICS
                       </button>
@@ -4499,9 +4586,16 @@ export default function App(){
             </div>
 
             {/* 3. Settings Control Center (Other Features) */}
-            <div className="rounded-xl border border-white/10 p-4 space-y-4" style={{ background: "rgba(10, 22, 40, 0.3)" }}>
-              <span className="text-[10px] font-mono tracking-widest font-bold text-[#A78BFA] block">
-                ⚙️ VESSEL SYSTEMS & MODE CONTROLS
+            <div 
+              className="border border-white/10 p-5 space-y-4 shadow-xl rounded-2xl" 
+              style={{ 
+                background: "linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.005) 100%)",
+                backdropFilter: "blur(16px)",
+                WebkitBackdropFilter: "blur(16px)"
+              }}
+            >
+              <span className="text-[10px] font-mono tracking-[0.12em] font-black text-[#A78BFA] flex items-center gap-1.5 uppercase">
+                <span>⚙️</span> VESSEL SYSTEMS & MODE CONTROLS
               </span>
 
               {/* Ambient Star Speed Slider */}
@@ -4526,7 +4620,7 @@ export default function App(){
                       setStarSpeed(val);
                       localStorage.setItem("rmx_star_speed", String(val));
                     }}
-                    className="flex-1 accent-[#A78BFA] bg-slate-800 rounded-lg h-1"
+                    className="flex-1 accent-[#A78BFA] bg-slate-950/50 rounded-lg h-1"
                   />
                   <span className="text-[9px] font-mono text-slate-500">3.0x</span>
                 </div>
@@ -4582,7 +4676,7 @@ export default function App(){
                       window.location.reload();
                     }
                   }}
-                  className="px-2.5 py-1 rounded border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/40 text-red-400 font-mono text-[9px] transition-all duration-150"
+                  className="px-3 py-1.5 rounded-xl border border-red-500/15 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/35 text-red-400 font-mono text-[9px] tracking-widest uppercase font-black transition-all duration-200"
                 >
                   WIPE CHANNELS
                 </button>

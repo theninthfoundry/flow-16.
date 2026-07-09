@@ -31,7 +31,7 @@ function getGeminiClient() {
 // API routes FIRST
 app.post("/api/gemini/chat", async (req, res) => {
   try {
-    const { message, history } = req.body;
+    const { message, history, highThinkingEnabled } = req.body;
     
     let ai;
     try {
@@ -43,19 +43,38 @@ app.post("/api/gemini/chat", async (req, res) => {
     const contents = history || [];
     contents.push({ role: "user", parts: [{ text: message }] });
 
-    const response = await ai.models.generateContent({
-      model: "gemini-3.1-pro-preview",
-      contents,
-      config: {
-        systemInstruction: "You are Flow 16's AI Copilot, a high-intelligence systems and AI architect reasoning engine. Your thinking level is set to HIGH to solve extremely complex questions. Help the user master high-performance systems engineering, low-level optimizations (C/C++, Assembly, Linux kernel, mmap, locks), PostgreSQL query optimizations, database design, Docker, Kubernetes, and Machine Learning math. Keep responses extremely concise, structured, and mathematically precise.",
-        thinkingConfig: {
-          thinkingLevel: ThinkingLevel.HIGH,
+    let response;
+    let groundingMetadata;
+
+    if (highThinkingEnabled) {
+      // Use gemini-3.1-pro-preview with high thinking for deep systems reasoning
+      response = await ai.models.generateContent({
+        model: "gemini-3.1-pro-preview",
+        contents,
+        config: {
+          systemInstruction: "You are Flow 16's AI Copilot, a high-intelligence systems and AI architect reasoning engine. Your thinking level is set to HIGH to solve extremely complex questions. Help the user master high-performance systems engineering, low-level optimizations (C/C++, Assembly, Linux kernel, mmap, locks), PostgreSQL query optimizations, database design, Docker, Kubernetes, and Machine Learning math. Keep responses extremely concise, structured, and mathematically precise.",
+          thinkingConfig: {
+            thinkingLevel: ThinkingLevel.HIGH,
+          }
         }
-      }
-    });
+      });
+    } else {
+      // Use gemini-3.5-flash with Google Search grounding for up-to-date, accurate systems & tech info
+      response = await ai.models.generateContent({
+        model: "gemini-3.5-flash",
+        contents,
+        config: {
+          systemInstruction: "You are Flow 16's AI Copilot, an elite systems and AI architect tutor with real-time web search capabilities. Your thinking level is set to FAST. Help the user with low-level systems engineering, database optimization, or AI math. Use your web search tool to find the most up-to-date and highly accurate technical details (e.g. latest versions, releases, docs, standards, performance benchmarks) and reference them naturally. Keep responses concise, structured, and mathematically precise.",
+          tools: [{ googleSearch: {} }],
+        }
+      });
+      groundingMetadata = response.candidates?.[0]?.groundingMetadata;
+    }
 
     res.json({
       text: response.text,
+      groundingChunks: groundingMetadata?.groundingChunks || [],
+      searchQueries: groundingMetadata?.webSearchQueries || []
     });
   } catch (error: any) {
     console.error("Gemini API Error:", error);
@@ -81,7 +100,8 @@ app.post("/api/gemini/lesson", async (req, res) => {
       model: "gemini-3.5-flash",
       contents: `Generate a high-quality interactive lesson, 3 multiple-choice quiz questions, and study notes about the topic: "${topic}".`,
       config: {
-        systemInstruction: "You are an elite, world-class Systems Engineering Professor and AI systems architect tutor. Your goal is to explain complex low-level concepts with beautiful clarity and technical precision. Generate a detailed, highly readable markdown lesson, a 3-question multiple choice quiz to test understanding (with option items, correctIndex, and clear explanations), and a summary set of notes formatted in structured markdown.",
+        systemInstruction: "You are an elite, world-class Systems Engineering Professor and AI systems architect tutor. Your goal is to explain complex low-level concepts with beautiful clarity and technical precision. Use the googleSearch tool to locate real-world reference specifications, performance benchmarks, and industry standard docs when crafting the lesson content. Generate a detailed, highly readable markdown lesson, a 3-question multiple choice quiz to test understanding (with option items, correctIndex, and clear explanations), and a summary set of notes formatted in structured markdown.",
+        tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
