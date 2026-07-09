@@ -2296,6 +2296,8 @@ export default function App(){
 
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState("");
+  const [sandboxName, setSandboxName] = useState("");
 
   // Custom Flow Portal & AI Copilot State
   const [portalOpen, setPortalOpen] = useState(false);
@@ -2488,12 +2490,12 @@ export default function App(){
     setSyncState("saving");
     const t = setTimeout(() => {
       setSyncState("saved");
-      if (auth.currentUser) {
-        syncToFirestore(auth.currentUser.uid);
+      if (user) {
+        syncToFirestore(user.uid);
       }
     }, 700);
     return () => clearTimeout(t);
-  }, [syncToFirestore]);
+  }, [syncToFirestore, user]);
 
   // Make triggerCloudSync globally available
   useEffect(() => {
@@ -2501,67 +2503,154 @@ export default function App(){
       setSyncState("saving");
       setTimeout(() => {
         setSyncState("saved");
-        if (auth.currentUser) {
-          syncToFirestore(auth.currentUser.uid);
+        if (user) {
+          syncToFirestore(user.uid);
         }
       }, 700);
     };
     return () => {
       delete window.triggerCloudSync;
     };
-  }, [syncToFirestore]);
+  }, [syncToFirestore, user]);
+
+  const handleGoogleSignIn = async () => {
+    setAuthError("");
+    try {
+      await signInWithPopup(auth, googleProvider);
+      playSuccessBeep(audioEnabled);
+    } catch (err) {
+      console.error("Google login failed:", err);
+      let errMsg = "Google authentication failed. Please open in a new tab or use Sandbox mode.";
+      if (err.code === "auth/popup-blocked") {
+        errMsg = "Popup was blocked by your browser. Please allow popups or open the app in a new tab.";
+      } else if (err.code === "auth/iframe-userAgent-blocked" || err.message?.includes("iframe")) {
+        errMsg = "Google login is blocked inside the embedded iframe. Use Sandbox Mode below to connect instantly!";
+      } else if (err.message) {
+        errMsg = err.message;
+      }
+      setAuthError(errMsg);
+    }
+  };
+
+  const loadUserProgress = useCallback(async (uid) => {
+    if (!uid) return;
+    setSyncState("saving");
+    try {
+      const progressRef = doc(db, "user_progress", uid);
+      let snap;
+      try {
+        snap = await getDoc(progressRef);
+      } catch (err) {
+        handleFirestoreError(err, OperationType.GET, `user_progress/${uid}`);
+      }
+      if (snap.exists()) {
+        const data = snap.data();
+        if (data.done) { setDone(data.done); ls.set("rmx_done", data.done); }
+        if (data.bkm) { setBkm(data.bkm); ls.set("rmx_bkm", data.bkm); }
+        if (data.wfocus !== undefined) { setWeekFocus(data.wfocus); ls.set("rmx_wfocus", data.wfocus); }
+        if (data.eliteDone) { setEliteDone(data.eliteDone); ls.set("rmx_elite_done", data.eliteDone); }
+        if (data.sundayAnswers) { setEliteSundayAnswers(data.sundayAnswers); ls.set("rmx_sunday_answers", data.sundayAnswers); }
+        if (data.weeklyHabits) { setWeeklyHabits(data.weeklyHabits); ls.set("rmx_weekly_habits", data.weeklyHabits); }
+
+        if (data.cheatSheets) {
+          Object.entries(data.cheatSheets).forEach(([k, v]) => {
+            ls.set(`rmx_cs_${k}`, v);
+          });
+        }
+        if (data.resources) {
+          Object.entries(data.resources).forEach(([k, v]) => {
+            ls.set(`rmx_res_${k}`, v);
+          });
+        }
+        if (data.moduleNotes) {
+          Object.entries(data.moduleNotes).forEach(([k, v]) => {
+            ls.set(`rmx_module_notes_${k}`, v);
+          });
+        }
+      } else {
+        await syncToFirestore(uid);
+      }
+      setSyncState("saved");
+    } catch (err) {
+      console.error("Error loading user progress:", err);
+      setSyncState("saved");
+    }
+  }, [setDone, setBkm, setWeekFocus, setEliteDone, setEliteSundayAnswers, setWeeklyHabits, syncToFirestore]);
+
+  const handleSandboxLogin = async (e) => {
+    if (e) e.preventDefault();
+    if (!sandboxName.trim()) return;
+    const simUser = {
+      uid: "sandbox_dev_" + Math.random().toString(36).substring(2, 9),
+      displayName: sandboxName.trim(),
+      email: "sandbox_developer@flow16.local",
+      photoURL: null,
+      isSandbox: true
+    };
+    ls.set("rmx_sandbox_user", simUser);
+    setUser(simUser);
+    setAuthError("");
+    setSandboxName("");
+    playSuccessBeep(audioEnabled);
+    await loadUserProgress(simUser.uid);
+  };
+
+  const handleDisconnect = async () => {
+    setAuthError("");
+    if (user?.isSandbox) {
+      ls.remove("rmx_sandbox_user");
+      setUser(null);
+      playSweepSound(audioEnabled, false);
+      return;
+    }
+    try {
+      await signOut(auth);
+      playSweepSound(audioEnabled, false);
+    } catch (e) {
+      console.error("Sign-out failed:", e);
+    }
+  };
 
   // Auth observer
   useEffect(() => {
+    // Check if there is already a sandbox user logged in
+    const sandboxUser = ls.get("rmx_sandbox_user", null);
+    if (sandboxUser) {
+      setUser(sandboxUser);
+      setAuthLoading(false);
+      loadUserProgress(sandboxUser.uid);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      // Avoid overriding active sandbox session with null firebase user
+      const currentSandboxUser = ls.get("rmx_sandbox_user", null);
+      if (currentSandboxUser) {
+        setUser(currentSandboxUser);
+        setAuthLoading(false);
+        return;
+      }
+
       setUser(currentUser);
       if (currentUser) {
-        setSyncState("saving");
-        try {
-          const progressRef = doc(db, "user_progress", currentUser.uid);
-          let snap;
-          try {
-            snap = await getDoc(progressRef);
-          } catch (err) {
-            handleFirestoreError(err, OperationType.GET, `user_progress/${currentUser.uid}`);
-          }
-          if (snap.exists()) {
-            const data = snap.data();
-            if (data.done) { setDone(data.done); ls.set("rmx_done", data.done); }
-            if (data.bkm) { setBkm(data.bkm); ls.set("rmx_bkm", data.bkm); }
-            if (data.wfocus !== undefined) { setWeekFocus(data.wfocus); ls.set("rmx_wfocus", data.wfocus); }
-            if (data.eliteDone) { setEliteDone(data.eliteDone); ls.set("rmx_elite_done", data.eliteDone); }
-            if (data.sundayAnswers) { setEliteSundayAnswers(data.sundayAnswers); ls.set("rmx_sunday_answers", data.sundayAnswers); }
-            if (data.weeklyHabits) { setWeeklyHabits(data.weeklyHabits); ls.set("rmx_weekly_habits", data.weeklyHabits); }
-
-            if (data.cheatSheets) {
-              Object.entries(data.cheatSheets).forEach(([k, v]) => {
-                ls.set(`rmx_cs_${k}`, v);
-              });
-            }
-            if (data.resources) {
-              Object.entries(data.resources).forEach(([k, v]) => {
-                ls.set(`rmx_res_${k}`, v);
-              });
-            }
-            if (data.moduleNotes) {
-              Object.entries(data.moduleNotes).forEach(([k, v]) => {
-                ls.set(`rmx_module_notes_${k}`, v);
-              });
-            }
-          } else {
-            await syncToFirestore(currentUser.uid);
-          }
-          setSyncState("saved");
-        } catch (err) {
-          console.error("Error loading user progress:", err);
-          setSyncState("saved");
-        }
+        await loadUserProgress(currentUser.uid);
       }
       setAuthLoading(false);
     });
     return () => unsubscribe();
-  }, [syncToFirestore]);
+  }, [loadUserProgress]);
+
+  // Prevent background scrolling when Flow Portal drawer is open
+  useEffect(() => {
+    if (portalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [portalOpen]);
 
   // Autosync on local state updates when user is logged in
   useEffect(() => {
@@ -3911,7 +4000,15 @@ export default function App(){
             setPortalOpen(false);
             playSweepSound(audioEnabled, false);
           }}
-          className="fixed inset-0 z-[1000] bg-black/75 backdrop-blur-md"
+          className="fixed inset-0"
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 1000,
+            backgroundColor: "rgba(0, 0, 0, 0.75)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)"
+          }}
         />
 
         {/* Sliding drawer panel container */}
@@ -3920,10 +4017,22 @@ export default function App(){
           animate={{ x: 0 }}
           exit={{ x: "100%" }}
           transition={{ type: "spring", damping: 26, stiffness: 190 }}
-          className="fixed top-0 right-0 h-full w-full max-w-md sm:max-w-lg z-[1001] border-l border-white/10 shadow-2xl flex flex-col font-sans select-none text-white overflow-hidden"
+          className="border-l border-white/10 shadow-2xl flex flex-col font-sans select-none text-white overflow-hidden"
           style={{
-            background: "linear-gradient(180deg, #071324 0%, #030811 100%)",
-            boxShadow: "-12px 0 40px rgba(0,0,0,0.9)"
+            position: "fixed",
+            top: 0,
+            right: 0,
+            height: "100%",
+            width: "100%",
+            maxWidth: "480px",
+            zIndex: 1001,
+            backgroundColor: "#050d1a",
+            backgroundImage: "linear-gradient(180deg, #071324 0%, #030811 100%)",
+            boxShadow: "-12px 0 40px rgba(0,0,0,0.9)",
+            display: "flex",
+            flexDirection: "column",
+            fontFamily: "var(--font-sans)",
+            overflow: "hidden"
           }}
         >
           {/* Header */}
@@ -3974,7 +4083,7 @@ export default function App(){
                     Connect your secure Google workspace to synchronize and back up roadmap items, notebooks, custom cheat sheets, bookmarks, and habit metrics.
                   </p>
                   <button
-                    onClick={() => signInWithPopup(auth, googleProvider).catch(e => console.error("Sign-in failed:", e))}
+                    onClick={handleGoogleSignIn}
                     className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-white/10 bg-white/5 text-xs font-mono font-semibold text-white hover:bg-white/10 hover:border-[#A78BFA]/30 transition-all duration-200"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
@@ -3982,6 +4091,34 @@ export default function App(){
                     </svg>
                     CONNECT GOOGLE IDENTITY
                   </button>
+
+                  {authError && (
+                    <div className="p-2.5 bg-red-500/10 border border-red-500/20 rounded-lg text-[10px] font-mono text-red-400 leading-normal">
+                      ⚠ {authError}
+                    </div>
+                  )}
+
+                  <div className="pt-2 border-t border-white/5 space-y-2">
+                    <div className="text-[8px] font-mono tracking-widest text-slate-500 text-center uppercase">
+                      — OR BYPASS IFRAME WITH SANDBOX ACCESS —
+                    </div>
+                    <form onSubmit={handleSandboxLogin} className="flex gap-1.5">
+                      <input
+                        type="text"
+                        value={sandboxName}
+                        onChange={e => setSandboxName(e.target.value)}
+                        placeholder="Enter hacker name (e.g. Neo)..."
+                        className="flex-1 bg-black/40 border border-white/10 rounded px-2.5 py-1.5 text-xs font-mono text-white focus:outline-none focus:border-[#A78BFA]/50 transition-all placeholder:text-slate-600"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!sandboxName.trim()}
+                        className="px-3 py-1.5 rounded bg-[#A78BFA]/10 border border-[#A78BFA]/25 text-[#A78BFA] hover:bg-[#A78BFA]/20 text-[10px] font-mono font-bold transition-all disabled:opacity-40 disabled:hover:bg-[#A78BFA]/10"
+                      >
+                        LOGIN
+                      </button>
+                    </form>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -3999,12 +4136,19 @@ export default function App(){
                       </div>
                     )}
                     <div className="min-w-0 flex-1 font-mono">
-                      <div className="text-xs font-bold text-slate-100 truncate">{user.displayName || "Explorer"}</div>
+                      <div className="text-xs font-bold text-slate-100 truncate flex items-center gap-1.5">
+                        {user.displayName || "Explorer"}
+                        {user.isSandbox && (
+                          <span className="text-[8px] tracking-wider px-1 py-0.5 rounded bg-[#A78BFA]/20 text-[#A78BFA] border border-[#A78BFA]/30 uppercase font-bold">
+                            SANDBOX
+                          </span>
+                        )}
+                      </div>
                       <div className="text-[10px] text-slate-400 truncate">{user.email}</div>
                     </div>
                   </div>
                   <button
-                    onClick={() => signOut(auth).catch(e => console.error("Sign-out failed:", e))}
+                    onClick={handleDisconnect}
                     className="w-full py-1.5 rounded-lg border border-red-500/10 bg-red-500/5 hover:bg-red-500/10 hover:border-red-500/20 text-red-400 text-xs font-mono font-medium transition-all duration-200"
                   >
                     DISCONNECT IDENTITY
