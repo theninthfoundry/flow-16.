@@ -1,0 +1,28 @@
+{
+  "schemas": {
+    "users": {
+      "fields": {
+        "email": "string",
+        "displayName": "string",
+        "photoURL": "string",
+        "lastActive": "timestamp"
+      }
+    },
+    "user_progress": {
+      "fields": {
+        "uid": "string",
+        "done": "map",
+        "bkm": "map",
+        "wfocus": "string",
+        "eliteDone": "map",
+        "sundayAnswers": "map",
+        "weeklyHabits": "map",
+        "cheatSheets": "map",
+        "resources": "map",
+        "lastUpdated": "timestamp"
+      }
+    }
+  },
+  "securityRules": "rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /users/{userId} {\n      allow read, write: if request.auth != null && request.auth.uid == userId;\n    }\n    match /user_progress/{userId} {\n      allow read, write: if request.auth != null && request.auth.uid == userId;\n    }\n  }\n}",
+  "indexes": []
+}

@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { auth, db, googleProvider, signInWithPopup, signOut, onAuthStateChanged, doc, getDoc, setDoc, serverTimestamp } from "./firebase";
+
 
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@1,800;1,900&display=swap');
@@ -1404,8 +1406,8 @@ function CheatSheet({storeKey,color}){
   const [saved,setSaved]=useState(true);
   const timer=useRef(null);
   const hasContent=text.trim().length>0;
-  const onChange=v=>{setText(v);setSaved(false);clearTimeout(timer.current);timer.current=setTimeout(()=>{ls.set(`rmx_cs_${storeKey}`,v);setSaved(true);},700);};
-  const save=()=>{ls.set(`rmx_cs_${storeKey}`,text);setSaved(true);setEditing(false);};
+  const onChange=v=>{setText(v);setSaved(false);clearTimeout(timer.current);timer.current=setTimeout(()=>{ls.set(`rmx_cs_${storeKey}`,v);setSaved(true);window.triggerCloudSync?.();},700);};
+  const save=()=>{ls.set(`rmx_cs_${storeKey}`,text);setSaved(true);setEditing(false);window.triggerCloudSync?.();};
   const ph=`# Heading\n## Subheading\n- Key point with **bold** or \`code\`\n> Important insight\n\n## Formula / Steps\n- Step 1\n- Step 2`;
   return(
     <div style={{marginTop:"10px",background:"rgba(0,0,0,0.3)",border:`1px solid ${color}20`,borderRadius:"8px",padding:"11px",animation:"fadeIn .2s ease both"}}>
@@ -1419,7 +1421,7 @@ function CheatSheet({storeKey,color}){
           {!editing&&<button className="rm-btn" onClick={()=>setEditing(true)} style={{padding:"3px 9px",borderRadius:"5px",background:`${color}14`,border:`1px solid ${color}30`,color,fontSize:"10px",fontWeight:"600"}}>{hasContent?"✏️ Edit":"+ Write"}</button>}
           {editing&&hasContent&&<button className="rm-btn" onClick={()=>setEditing(false)} style={{padding:"3px 9px",borderRadius:"5px",background:"rgba(255,255,255,0.04)",border:`1px solid ${BDR2}`,color:T2,fontSize:"10px",fontWeight:"600"}}>👁 Preview</button>}
           {editing&&<button className="rm-btn" onClick={save} style={{padding:"3px 9px",borderRadius:"5px",background:`${color}18`,border:`1px solid ${color}38`,color,fontSize:"10px",fontWeight:"700"}}>💾 Save</button>}
-          {hasContent&&!editing&&<button className="rm-btn" onClick={()=>{setText("");ls.set(`rmx_cs_${storeKey}`,"");}} style={{padding:"3px 7px",borderRadius:"5px",background:"transparent",border:`1px solid ${BDR}`,color:T3,fontSize:"10px"}}>✕</button>}
+          {hasContent&&!editing&&<button className="rm-btn" onClick={()=>{setText("");ls.set(`rmx_cs_${storeKey}`,"");window.triggerCloudSync?.();}} style={{padding:"3px 7px",borderRadius:"5px",background:"transparent",border:`1px solid ${BDR}`,color:T3,fontSize:"10px"}}>✕</button>}
         </div>
       </div>
       {editing
@@ -1449,8 +1451,9 @@ function Resources({monthNum,color}){
     const next=[...items,{...form,id:Date.now()}];
     setItems(next);ls.set(`rmx_res_${monthNum}`,next);
     setForm({title:"",url:"",type:"article",note:""});setAdding(false);setErr("");
+    window.triggerCloudSync?.();
   };
-  const remove=id=>{const next=items.filter(r=>r.id!==id);setItems(next);ls.set(`rmx_res_${monthNum}`,next);};
+  const remove=id=>{const next=items.filter(r=>r.id!==id);setItems(next);ls.set(`rmx_res_${monthNum}`,next);window.triggerCloudSync?.();};
   return(
     <div style={{marginTop:"12px",background:"rgba(0,0,0,0.22)",border:`1px solid rgba(255,255,255,0.07)`,borderRadius:"10px",padding:"13px"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"11px"}}>
@@ -1664,6 +1667,7 @@ function ModuleNoteDrawer({ activeMonth, onClose, onSave }) {
     setText(clean);
     ls.set(`rmx_module_notes_${activeMonth}`, clean);
     if (onSave) onSave();
+    window.triggerCloudSync?.();
   };
 
   return (
@@ -2239,13 +2243,147 @@ export default function App(){
 
 
 
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  const syncToFirestore = useCallback(async (uid) => {
+    if (!uid) return;
+    try {
+      const doneData = ls.get("rmx_done", {});
+      const bkmData = ls.get("rmx_bkm", {});
+      const wfocusData = ls.get("rmx_wfocus", "");
+      const eliteDoneData = ls.get("rmx_elite_done", {});
+      const sundayAnswersData = ls.get("rmx_sunday_answers", { q1: "", q2: "", q3: "", q4: "", q5: "", q6: "" });
+      const weeklyHabitsData = ls.get("rmx_weekly_habits", {});
+
+      const cheatSheets = {};
+      const resources = {};
+      const moduleNotes = {};
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key) {
+          if (key.startsWith("rmx_cs_")) {
+            cheatSheets[key.replace("rmx_cs_", "")] = ls.get(key, "");
+          } else if (key.startsWith("rmx_res_")) {
+            resources[key.replace("rmx_res_", "")] = ls.get(key, []);
+          } else if (key.startsWith("rmx_module_notes_")) {
+            moduleNotes[key.replace("rmx_module_notes_", "")] = ls.get(key, "");
+          }
+        }
+      }
+
+      const userProgressRef = doc(db, "user_progress", uid);
+      await setDoc(userProgressRef, {
+        uid,
+        done: doneData,
+        bkm: bkmData,
+        wfocus: wfocusData,
+        eliteDone: eliteDoneData,
+        sundayAnswers: sundayAnswersData,
+        weeklyHabits: weeklyHabitsData,
+        cheatSheets,
+        resources,
+        moduleNotes,
+        lastUpdated: serverTimestamp()
+      }, { merge: true });
+    } catch (err) {
+      console.error("Error syncing to Firestore:", err);
+    }
+  }, []);
+
   const triggerSaveSync = useCallback(() => {
     setSyncState("saving");
     const t = setTimeout(() => {
       setSyncState("saved");
+      if (auth.currentUser) {
+        syncToFirestore(auth.currentUser.uid);
+      }
     }, 700);
     return () => clearTimeout(t);
-  }, []);
+  }, [syncToFirestore]);
+
+  // Make triggerCloudSync globally available
+  useEffect(() => {
+    window.triggerCloudSync = () => {
+      setSyncState("saving");
+      setTimeout(() => {
+        setSyncState("saved");
+        if (auth.currentUser) {
+          syncToFirestore(auth.currentUser.uid);
+        }
+      }, 700);
+    };
+    return () => {
+      delete window.triggerCloudSync;
+    };
+  }, [syncToFirestore]);
+
+  // Auth observer
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        setSyncState("saving");
+        try {
+          const progressRef = doc(db, "user_progress", currentUser.uid);
+          const snap = await getDoc(progressRef);
+          if (snap.exists()) {
+            const data = snap.data();
+            if (data.done) { setDone(data.done); ls.set("rmx_done", data.done); }
+            if (data.bkm) { setBkm(data.bkm); ls.set("rmx_bkm", data.bkm); }
+            if (data.wfocus !== undefined) { setWeekFocus(data.wfocus); ls.set("rmx_wfocus", data.wfocus); }
+            if (data.eliteDone) { setEliteDone(data.eliteDone); ls.set("rmx_elite_done", data.eliteDone); }
+            if (data.sundayAnswers) { setEliteSundayAnswers(data.sundayAnswers); ls.set("rmx_sunday_answers", data.sundayAnswers); }
+            if (data.weeklyHabits) { setWeeklyHabits(data.weeklyHabits); ls.set("rmx_weekly_habits", data.weeklyHabits); }
+
+            if (data.cheatSheets) {
+              Object.entries(data.cheatSheets).forEach(([k, v]) => {
+                ls.set(`rmx_cs_${k}`, v);
+              });
+            }
+            if (data.resources) {
+              Object.entries(data.resources).forEach(([k, v]) => {
+                ls.set(`rmx_res_${k}`, v);
+              });
+            }
+            if (data.moduleNotes) {
+              Object.entries(data.moduleNotes).forEach(([k, v]) => {
+                ls.set(`rmx_module_notes_${k}`, v);
+              });
+            }
+          } else {
+            await syncToFirestore(currentUser.uid);
+          }
+          setSyncState("saved");
+        } catch (err) {
+          console.error("Error loading user progress:", err);
+          setSyncState("saved");
+        }
+      }
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
+  }, [syncToFirestore]);
+
+  // Autosync on local state updates when user is logged in
+  useEffect(() => {
+    ls.set("rmx_wfocus", weekFocus);
+    if (isFirstRender.current) return;
+    
+    setSyncState("saving");
+    const t = setTimeout(() => {
+      if (user) {
+        syncToFirestore(user.uid).then(() => {
+          setSyncState("saved");
+        });
+      } else {
+        setSyncState("saved");
+      }
+    }, 1500);
+    
+    return () => clearTimeout(t);
+  }, [done, bkm, weekFocus, eliteDone, eliteSundayAnswers, weeklyHabits, user, syncToFirestore]);
 
   const matchesSearch = useCallback((month, query) => {
     const q = query.toLowerCase().trim();
@@ -2304,29 +2442,6 @@ export default function App(){
   
   useEffect(()=>{if(confetti!=null){const t=setTimeout(()=>setConfetti(null),3500);return()=>clearTimeout(t);}},[confetti]);
   
-  useEffect(() => {
-    if (isFirstRender.current) {
-      return;
-    }
-    setSyncState("saving");
-    const t = setTimeout(() => {
-      setSyncState("saved");
-    }, 700);
-    return () => clearTimeout(t);
-  }, [done]);
-
-  useEffect(() => {
-    ls.set("rmx_wfocus", weekFocus);
-    if (isFirstRender.current) {
-      return;
-    }
-    setSyncState("saving");
-    const t = setTimeout(() => {
-      setSyncState("saved");
-    }, 700);
-    return () => clearTimeout(t);
-  }, [weekFocus]);
-
   useEffect(() => {
     isFirstRender.current = false;
   }, []);
@@ -2410,6 +2525,136 @@ export default function App(){
             <div style={{ fontSize: "10px", color: T3, letterSpacing: "1.5px", marginTop: "6px", fontWeight: "700" }}>
               SYSTEMS & AI ARCHITECT ROADMAP
             </div>
+          </div>
+
+          {/* Database Cloud Sync & Auth Card */}
+          <div style={{
+            background: "linear-gradient(135deg, rgba(10, 22, 40, 0.55), rgba(5, 14, 30, 0.45))",
+            border: "1.5px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: "16px",
+            padding: "18px",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            position: "relative"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "12px" }}>
+              <span style={{ fontSize: "10px", fontWeight: "700", color: "#A78BFA", letterSpacing: "1px" }}>
+                ☁️ CLOUD SYNC & AUTH
+              </span>
+              {user && (
+                <span style={{
+                  fontSize: "9px",
+                  fontWeight: "700",
+                  color: syncState === "saving" ? "#FBBF24" : "#10F5A0",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px"
+                }}>
+                  <span style={{
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    background: syncState === "saving" ? "#FBBF24" : "#10F5A0",
+                    display: "inline-block",
+                    animation: "pulse 1.5s infinite"
+                  }} />
+                  {syncState === "saving" ? "Syncing…" : "Synced"}
+                </span>
+              )}
+            </div>
+
+            {authLoading ? (
+              <div style={{ padding: "8px 0", textAlign: "center", color: T3, fontSize: "11px" }} className="animate-pulse">
+                Initializing Firebase Auth…
+              </div>
+            ) : !user ? (
+              <div>
+                <p style={{ fontSize: "11px", color: T3, lineHeight: "1.5", marginBottom: "14px" }}>
+                  Connect your Google account to automatically back up your roadmap completion status, custom cheat sheets, notes, bookmarks, and habit progress.
+                </p>
+                <button
+                  onClick={() => signInWithPopup(auth, googleProvider).catch(e => console.error("Sign-in failed:", e))}
+                  className="rm-btn"
+                  style={{
+                    width: "100%",
+                    padding: "9px 12px",
+                    background: "rgba(255, 255, 255, 0.04)",
+                    border: "1px solid rgba(255, 255, 255, 0.12)",
+                    borderRadius: "8px",
+                    color: T1,
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px"
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
+                    e.currentTarget.style.borderColor = "#A78BFA";
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.04)";
+                    e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.12)";
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                    <path fill="#EA4335" d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.514 5.514 0 0 1 8.5 13c0-3.04 2.46-5.514 5.5-5.514 1.342 0 2.57.486 3.524 1.286l3.057-3.057C18.733 3.943 16.514 3 14 3a10 10 0 0 0-10 10 10 10 0 0 0 10 10c5.52 0 10-4.48 10-10 0-.685-.06-1.354-.171-2H12.24z"/>
+                  </svg>
+                  Sign in with Google
+                </button>
+              </div>
+            ) : (
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px", background: "rgba(255,255,255,0.02)", padding: "10px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.04)" }}>
+                  {user.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt={user.displayName}
+                      referrerPolicy="no-referrer"
+                      style={{ width: "32px", height: "32px", borderRadius: "50%", border: "1.5px solid #A78BFA" }}
+                    />
+                  ) : (
+                    <div style={{ width: "32px", height: "32px", borderRadius: "50%", background: "#A78BFA", color: "#000", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: "700" }}>
+                      {user.displayName ? user.displayName[0].toUpperCase() : "U"}
+                    </div>
+                  )}
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: "12px", fontWeight: "700", color: T1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {user.displayName || "Explorer"}
+                    </div>
+                    <div style={{ fontSize: "10px", color: T3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {user.email}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => signOut(auth).catch(e => console.error("Sign-out failed:", e))}
+                  className="rm-btn"
+                  style={{
+                    width: "100%",
+                    padding: "7px 12px",
+                    background: "rgba(239, 68, 68, 0.08)",
+                    border: "1px solid rgba(239, 68, 68, 0.15)",
+                    borderRadius: "8px",
+                    color: "#FCA5A5",
+                    fontSize: "11px",
+                    fontWeight: "600",
+                    transition: "all 0.2s"
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.background = "rgba(239, 68, 68, 0.15)";
+                    e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.3)";
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.background = "rgba(239, 68, 68, 0.08)";
+                    e.currentTarget.style.borderColor = "rgba(239, 68, 68, 0.15)";
+                  }}
+                >
+                  Disconnect Account
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Embedded Pomodoro focus card */}
