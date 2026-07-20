@@ -7,7 +7,6 @@ import {
   Terminal, Cpu, Database, Layers, Play, Activity, Network, ArrowRight, Sun, Moon
 } from "lucide-react";
 import GalacticQuestMap from "./components/GalacticQuestMap";
-import RoadmapHUD from "./components/RoadmapHUD";
 
 const playSuccessBeep = (enabled) => {
   if (!enabled) return;
@@ -72,6 +71,14 @@ const CSS = `
   --nebula-teal: rgba(20, 184, 166, 0.14);
   --nebula-gold: rgba(245, 158, 11, 0.11);
   --nebula-magenta: rgba(236, 72, 153, 0.10);
+  --vessel-bg: #020611;
+  --vessel-card: rgba(10, 25, 47, 0.45);
+  --vessel-card2: rgba(16, 36, 66, 0.6);
+  --vessel-bdr: rgba(255, 255, 255, 0.07);
+  --vessel-bdr2: rgba(255, 255, 255, 0.12);
+  --vessel-t1: #F8FAFC;
+  --vessel-t2: #CBD5E1;
+  --vessel-t3: #64748B;
 }
 @keyframes spaceThrum {
   0%, 100% {
@@ -535,7 +542,7 @@ const getTopicDomain = (topic, month) => {
   return "Systems";
 };
 const RTYPES=[{v:"video",i:"🎬",l:"Video"},{v:"article",i:"📄",l:"Article"},{v:"docs",i:"📚",l:"Docs"},{v:"course",i:"🎓",l:"Course"},{v:"book",i:"📖",l:"Book"},{v:"github",i:"💻",l:"GitHub"},{v:"tool",i:"🔧",l:"Tool"},{v:"other",i:"🔗",l:"Other"}];
-const BG="#020611",CARD="rgba(10, 25, 47, 0.45)",CARD2="rgba(16, 36, 66, 0.6)",BDR="rgba(255,255,255,0.07)",BDR2="rgba(255,255,255,0.12)",T1="#F8FAFC",T2="#CBD5E1",T3="#64748B";
+const BG="var(--vessel-bg)",CARD="var(--vessel-card)",CARD2="var(--vessel-card2)",BDR="var(--vessel-bdr)",BDR2="var(--vessel-bdr2)",T1="var(--vessel-t1)",T2="var(--vessel-t2)",T3="var(--vessel-t3)";
 const GLASS={backdropFilter:"blur(16px)",WebkitBackdropFilter:"blur(16px)"};
 
 const DEFAULT_RESOURCES = {
@@ -4204,7 +4211,65 @@ function SystemsLab({ audioEnabled }) {
   );
 }
 
+const PALETTES = {
+  nebula: {
+    bg: "#020611",
+    card: "rgba(10, 25, 47, 0.45)",
+    card2: "rgba(16, 36, 66, 0.6)",
+    bdr: "rgba(255, 255, 255, 0.07)",
+    bdr2: "rgba(255, 255, 255, 0.12)",
+    t1: "#F8FAFC",
+    t2: "#CBD5E1",
+    t3: "#64748B"
+  },
+  crimson: {
+    bg: "#0b0101",
+    card: "rgba(45, 10, 10, 0.45)",
+    card2: "rgba(66, 16, 16, 0.6)",
+    bdr: "rgba(255, 50, 50, 0.1)",
+    bdr2: "rgba(255, 100, 100, 0.18)",
+    t1: "#FFF5F5",
+    t2: "#FEE2E2",
+    t3: "#F87171"
+  },
+  emerald: {
+    bg: "#010b06",
+    card: "rgba(10, 45, 25, 0.45)",
+    card2: "rgba(16, 66, 36, 0.6)",
+    bdr: "rgba(50, 255, 150, 0.1)",
+    bdr2: "rgba(100, 255, 200, 0.18)",
+    t1: "#F0FDF4",
+    t2: "#DCFCE7",
+    t3: "#4ADE80"
+  },
+  cyber: {
+    bg: "#070708",
+    card: "rgba(30, 25, 10, 0.45)",
+    card2: "rgba(50, 40, 16, 0.6)",
+    bdr: "rgba(250, 200, 50, 0.1)",
+    bdr2: "rgba(250, 220, 100, 0.18)",
+    t1: "#FFFDF5",
+    t2: "#FEF3C7",
+    t3: "#FBBF24"
+  }
+};
+
 export default function App() {
+  const [themePalette, setThemePalette] = useState(() => localStorage.getItem("rmx_theme_palette") || "nebula");
+
+  useEffect(() => {
+    const palette = PALETTES[themePalette] || PALETTES.nebula;
+    const root = document.documentElement;
+    root.style.setProperty("--vessel-bg", palette.bg);
+    root.style.setProperty("--vessel-card", palette.card);
+    root.style.setProperty("--vessel-card2", palette.card2);
+    root.style.setProperty("--vessel-bdr", palette.bdr);
+    root.style.setProperty("--vessel-bdr2", palette.bdr2);
+    root.style.setProperty("--vessel-t1", palette.t1);
+    root.style.setProperty("--vessel-t2", palette.t2);
+    root.style.setProperty("--vessel-t3", palette.t3);
+  }, [themePalette]);
+
   useEffect(()=>{
     if(document.getElementById("rmx-css"))return;
     const el=document.createElement("style");el.id="rmx-css";el.textContent=CSS;
@@ -4781,16 +4846,6 @@ export default function App() {
           {/* Embedded Pomodoro focus card */}
           <Pomodoro />
 
-          {/* Real-time Systems AI Copilot Chatbot */}
-          <SidebarChatbot 
-            aiMessages={aiMessages}
-            aiLoading={aiLoading}
-            handleSendAiMessage={handleSendAiMessage}
-            highThinkingEnabled={highThinkingEnabled}
-            setHighThinkingEnabled={setHighThinkingEnabled}
-            audioEnabled={audioEnabled}
-          />
-
           {/* Systems Academy Card */}
           <SidebarAcademy
             customAcademyTopic={customAcademyTopic}
@@ -4875,7 +4930,6 @@ export default function App() {
                   { key: "roadmap", label: "Roadmap", icon: "rebel", color: "#FF2D78" },
                   { key: "library", label: "Library", icon: "jedi", color: "#A78BFA" },
                   { key: "tracks", label: "Tracks", icon: "mando", color: "#38bdf8" },
-                  { key: "elite", label: "Elite 1%", icon: "jedi", color: "#FBBF24" },
                   { key: "systems", label: "Systems Lab", icon: "mando", color: "#22D3EE" },
                   { key: "progress", label: "Progress", icon: "empire", color: "#10F5A0" }
                 ].map(item => (
@@ -4935,8 +4989,6 @@ export default function App() {
 
         {tab==="roadmap"&&(
           <div>
-            {/* Real-time Cockpit Telemetry HUD */}
-            <RoadmapHUD done={done} setExp={setExp} audioEnabled={audioEnabled} />
 
             {/* Horizontally Scrollable Category & Difficulty Filters with Glassmorphism */}
             <div style={{background:"rgba(10, 25, 47, 0.22)", backdropFilter:"blur(20px)", WebkitBackdropFilter:"blur(20px)", border:`1px solid ${BDR}`, borderRadius:"12px", padding:"12px 14px", marginBottom:"18px", boxShadow:"0 8px 32px rgba(0,0,0,0.3)"}}>
@@ -5354,7 +5406,7 @@ export default function App() {
           </div>
         )}
 
-        {tab==="elite"&&(
+        {false&&(
           <div className="rm-fade" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {/* Header section with high caliber quote */}
             <div style={{ background: CARD, border: `1px solid ${BDR}`, borderRadius: "11px", padding: "16px 18px", position: "relative", overflow: "hidden" }}>
@@ -6238,6 +6290,46 @@ export default function App() {
                           className="flex-1 accent-[#A78BFA] bg-slate-900 rounded-lg h-1"
                         />
                         <span className="text-[8px] font-mono text-slate-500">3.0x</span>
+                      </div>
+                    </div>
+
+                    {/* Galactic Theme Selector */}
+                    <div className="space-y-1.5 border-t border-white/5 pt-3">
+                      <div className="flex items-center justify-between font-mono text-[9px] text-slate-400">
+                        <span className="flex items-center gap-1.5">
+                          <span>🎨</span> VESSEL COCKPIT THEME
+                        </span>
+                        <span className="text-[#10F5A0] font-bold uppercase">{themePalette}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { id: "nebula", label: "Nebula Purple", color1: "#8B5CF6", color2: "#EC4899" },
+                          { id: "crimson", label: "Imperial Crimson", color1: "#EF4444", color2: "#F97316" },
+                          { id: "emerald", label: "Jedi Emerald", color1: "#10F5A0", color2: "#06B6D4" },
+                          { id: "cyber", label: "Cyberpunk Grid", color1: "#FBBF24", color2: "#EF4444" }
+                        ].map(themeOpt => (
+                          <button
+                            key={themeOpt.id}
+                            onClick={() => {
+                              setThemePalette(themeOpt.id);
+                              localStorage.setItem("rmx_theme_palette", themeOpt.id);
+                              playSuccessBeep(audioEnabled);
+                            }}
+                            style={{
+                              background: themePalette === themeOpt.id ? "rgba(255, 255, 255, 0.06)" : "rgba(255, 255, 255, 0.02)",
+                              borderColor: themePalette === themeOpt.id ? themeOpt.color1 : "rgba(255, 255, 255, 0.06)"
+                            }}
+                            className="flex items-center gap-2 px-2 py-1.5 rounded-lg border text-left transition-all duration-200 hover:bg-white/5 cursor-pointer"
+                          >
+                            <div className="flex gap-0.5">
+                              <span style={{ background: themeOpt.color1 }} className="w-2.5 h-2.5 rounded-full inline-block shadow-sm" />
+                              <span style={{ background: themeOpt.color2 }} className="w-2.5 h-2.5 rounded-full inline-block shadow-sm" />
+                            </div>
+                            <span className="font-mono text-[8.5px] font-bold text-slate-200 tracking-tight leading-none">
+                              {themeOpt.label}
+                            </span>
+                          </button>
+                        ))}
                       </div>
                     </div>
 
