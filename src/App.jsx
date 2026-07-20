@@ -6,6 +6,8 @@ import {
   Sparkles, Settings, LogOut, X, ChevronRight, Sliders, User, Send, Trash2, Volume2, VolumeX, Brain, Zap, RefreshCw, Star,
   Terminal, Cpu, Database, Layers, Play, Activity, Network, ArrowRight, Sun, Moon
 } from "lucide-react";
+import GalacticQuestMap from "./components/GalacticQuestMap";
+import RoadmapHUD from "./components/RoadmapHUD";
 
 const playSuccessBeep = (enabled) => {
   if (!enabled) return;
@@ -4933,6 +4935,9 @@ export default function App() {
 
         {tab==="roadmap"&&(
           <div>
+            {/* Real-time Cockpit Telemetry HUD */}
+            <RoadmapHUD done={done} setExp={setExp} audioEnabled={audioEnabled} />
+
             {/* Horizontally Scrollable Category & Difficulty Filters with Glassmorphism */}
             <div style={{background:"rgba(10, 25, 47, 0.22)", backdropFilter:"blur(20px)", WebkitBackdropFilter:"blur(20px)", border:`1px solid ${BDR}`, borderRadius:"12px", padding:"12px 14px", marginBottom:"18px", boxShadow:"0 8px 32px rgba(0,0,0,0.3)"}}>
               <div style={{display:"flex", flexDirection:"column", gap:"10px"}}>
@@ -5836,6 +5841,17 @@ export default function App() {
                 <div style={{fontSize:"10px",color:T3,marginTop:"3px"}}>{compMonths} months fully done · {MONTHS.filter(m=>pct(m,done)>0&&pct(m,done)<100).length} in progress</div>
               </div>
             </div>
+
+            {/* Interactive Galactic Progress Map */}
+            <GalacticQuestMap 
+              done={done} 
+              bkm={bkm} 
+              setTab={setTab} 
+              setExp={setExp} 
+              audioEnabled={audioEnabled}
+              starSpeed={starSpeed}
+              setStarSpeed={setStarSpeed}
+            />
 
             {/* Interactive Progress Over Time Chart */}
             <RoadmapChart done={done} />
