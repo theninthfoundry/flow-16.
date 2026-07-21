@@ -4845,25 +4845,6 @@ export default function App() {
 
           {/* Embedded Pomodoro focus card */}
           <Pomodoro />
-
-          {/* Systems Academy Card */}
-          <SidebarAcademy
-            customAcademyTopic={customAcademyTopic}
-            setCustomAcademyTopic={setCustomAcademyTopic}
-            lessonData={lessonData}
-            setLessonData={setLessonData}
-            lessonLoading={lessonLoading}
-            handleGenerateLesson={handleGenerateLesson}
-            selectedAnswers={selectedAnswers}
-            setSelectedAnswers={setSelectedAnswers}
-            quizSubmitted={quizSubmitted}
-            setQuizSubmitted={setQuizSubmitted}
-            editableNotes={editableNotes}
-            setEditableNotes={setEditableNotes}
-            notesSavedStatus={notesSavedStatus}
-            handleSaveLessonNotes={handleSaveLessonNotes}
-            audioEnabled={audioEnabled}
-          />
         </aside>
 
         {/* Right Column (Main View Panel) */}
